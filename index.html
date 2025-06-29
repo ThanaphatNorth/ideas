@@ -1,494 +1,1948 @@
 <!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Unicorn Thailand: Interactive Dashboard</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>
+      Project Unicorn Thailand:
+      Interactive Dashboard
+    </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- Chosen Palette: Warm Neutrals (Cream, Soft Terracotta, Deep Slate, Sage Green) -->
     <!-- Application Structure Plan: The application is structured into four main thematic sections for a narrative user flow: 1) A compelling introduction to the report's thesis. 2) An interactive 'Deep Dive' to explore the 4 initial startup ideas, using tabs/buttons and Chart.js for the Magic Quadrants to make comparison intuitive. 3) A filterable and sortable 'Unicorn Watchlist' that is now clickable, opening a modal with detailed analysis for each of the 20 ideas. 4) A 'Founder's Playbook' section using an accordion to present actionable advice. This structure transforms the linear report into an exploratory tool, prioritizing user engagement and data discovery over the original document's format. -->
     <!-- Visualization & Content Choices: Magic Quadrants: Re-imagined as interactive Chart.js scatter plots. Unicorn Watchlist: An HTML table enhanced with JS for filtering, sorting, and now a click-to-view modal for detailed analysis of each idea. This modal view provides the same level of detail as the main ideas, fulfilling the user request. SWOTs: Presented in a clean 2x2 CSS Grid. All textual content is placed in context within these interactive sections. CONFIRMED: No SVG or Mermaid.js used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #FDFBF5; /* Cream background */
-            color: #2F3E46; /* Deep Slate text */
+      body {
+        font-family: "Sarabun",
+          sans-serif;
+        background-color: #fdfbf5; /* Cream background */
+        color: #2f3e46; /* Deep Slate text */
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .nav-link {
+        transition: all 0.3s;
+        border-bottom: 2px solid
+          transparent;
+      }
+      .nav-link:hover,
+      .nav-link.active {
+        color: #c27b7f; /* Soft Terracotta */
+        border-bottom-color: #c27b7f;
+      }
+      .btn-primary {
+        background-color: #52796f; /* Sage Green */
+        color: #ffffff;
+        transition: background-color
+          0.3s;
+      }
+      .btn-primary:hover {
+        background-color: #3b574f;
+      }
+      .btn-secondary {
+        background-color: #cad2c5;
+        color: #2f3e46;
+        transition: all 0.3s;
+      }
+      .btn-secondary.active,
+      .btn-secondary:hover {
+        background-color: #52796f;
+        color: #ffffff;
+      }
+      .sortable:hover {
+        cursor: pointer;
+        color: #c27b7f;
+      }
+      .modal-enter {
+        animation: fadeIn 0.3s ease-out;
+      }
+      .modal-leave {
+        animation: fadeOut 0.3s ease-in;
+      }
+      .modal-content-enter {
+        animation: fadeInUp 0.3s
+          ease-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+        to {
+          opacity: 1;
         }
-        .nav-link {
-            transition: all 0.3s;
-            border-bottom: 2px solid transparent;
+      }
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
         }
-        .nav-link:hover, .nav-link.active {
-            color: #C27B7F; /* Soft Terracotta */
-            border-bottom-color: #C27B7F;
+        to {
+          opacity: 0;
         }
-        .btn-primary {
-            background-color: #52796F; /* Sage Green */
-            color: #FFFFFF;
-            transition: background-color 0.3s;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-        .btn-primary:hover {
-            background-color: #3B574F;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .btn-secondary {
-            background-color: #CAD2C5;
-            color: #2F3E46;
-            transition: all 0.3s;
-        }
-        .btn-secondary.active, .btn-secondary:hover {
-            background-color: #52796F;
-            color: #FFFFFF;
-        }
-        .sortable:hover {
-            cursor: pointer;
-            color: #C27B7F;
-        }
-        .modal-enter {
-            animation: fadeIn 0.3s ease-out;
-        }
-        .modal-leave {
-            animation: fadeOut 0.3s ease-in;
-        }
-        .modal-content-enter {
-             animation: fadeInUp 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+      }
 
-        /* Responsive Table Styles */
-        @media (max-width: 768px) {
-            .responsive-table-wrapper {
-                overflow-x: hidden;
-            }
-            .responsive-table thead {
-                display: none;
-            }
-            .responsive-table, .responsive-table tbody, .responsive-table tr {
-                display: block;
-                width: 100%;
-            }
-            .responsive-table tr {
-                margin-bottom: 1rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 0.75rem;
-                padding: 1rem;
-                background-color: #fff;
-            }
-            .responsive-table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.75rem 0.25rem;
-                text-align: right;
-                border-bottom: 1px solid #f1f5f9;
-            }
-            .responsive-table td:last-child {
-                border-bottom: none;
-            }
-            .responsive-table td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                text-align: left;
-                margin-right: 1rem;
-                color: #475569;
-            }
-            .responsive-table td:first-child {
-                display: block;
-                text-align: left;
-                font-size: 1.125rem;
-                font-weight: 700;
-                color: #1e293b;
-                margin-bottom: 0.75rem;
-                padding-bottom: 0.75rem;
-                border-bottom: 2px solid #e2e8f0;
-            }
-            .responsive-table td:first-child::before {
-                display: none;
-            }
+      /* Responsive Table Styles */
+      @media (max-width: 768px) {
+        .responsive-table-wrapper {
+          overflow-x: hidden;
         }
+        .responsive-table thead {
+          display: none;
+        }
+        .responsive-table,
+        .responsive-table tbody,
+        .responsive-table tr {
+          display: block;
+          width: 100%;
+        }
+        .responsive-table tr {
+          margin-bottom: 1rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.75rem;
+          padding: 1rem;
+          background-color: #fff;
+        }
+        .responsive-table td {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem 0.25rem;
+          text-align: right;
+          border-bottom: 1px solid
+            #f1f5f9;
+        }
+        .responsive-table
+          td:last-child {
+          border-bottom: none;
+        }
+        .responsive-table td::before {
+          content: attr(data-label);
+          font-weight: 600;
+          text-align: left;
+          margin-right: 1rem;
+          color: #475569;
+        }
+        .responsive-table
+          td:first-child {
+          display: block;
+          text-align: left;
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 2px solid
+            #e2e8f0;
+        }
+        .responsive-table
+          td:first-child::before {
+          display: none;
+        }
+      }
     </style>
-</head>
-<body class="antialiased">
-
+  </head>
+  <body class="antialiased">
     <!-- Header & Navigation -->
-    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
-        <div class="container mx-auto px-4">
-            <nav class="flex justify-between items-center py-4">
-                <div class="text-2xl font-bold text-slate-800">
-                    <a href="#home">Project Unicorn<span class="text-rose-500">.th</span></a>
-                </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#deep-dive" class="nav-link font-medium">วิเคราะห์ไอเดียหลัก</a>
-                    <a href="#watchlist" class="nav-link font-medium">Unicorn Watchlist</a>
-                    <a href="#playbook" class="nav-link font-medium">Founder's Playbook</a>
-                </div>
-                <div class="md:hidden">
-                    <button id="mobile-menu-button" class="text-slate-800 focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    </button>
-                </div>
-            </nav>
-            <div id="mobile-menu" class="hidden md:hidden py-4">
-                <a href="#deep-dive" class="block py-2 text-center nav-link">วิเคราะห์ไอเดียหลัก</a>
-                <a href="#watchlist" class="block py-2 text-center nav-link">Unicorn Watchlist</a>
-                <a href="#playbook" class="block py-2 text-center nav-link">Founder's Playbook</a>
-            </div>
+    <header
+      id="header"
+      class="bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm"
+    >
+      <div
+        class="container mx-auto px-4"
+      >
+        <nav
+          class="flex justify-between items-center py-4"
+        >
+          <div
+            class="text-2xl font-bold text-slate-800"
+          >
+            <a href="#home"
+              >Project Unicorn<span
+                class="text-rose-500"
+                >.th</span
+              ></a
+            >
+          </div>
+          <div
+            class="hidden md:flex items-center space-x-8"
+          >
+            <a
+              href="#deep-dive"
+              class="nav-link font-medium"
+              >วิเคราะห์ไอเดียหลัก</a
+            >
+            <a
+              href="#watchlist"
+              class="nav-link font-medium"
+              >Unicorn Watchlist</a
+            >
+            <a
+              href="#playbook"
+              class="nav-link font-medium"
+              >Founder's Playbook</a
+            >
+          </div>
+          <div class="md:hidden">
+            <button
+              id="mobile-menu-button"
+              class="text-slate-800 focus:outline-none"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16m-7 6h7"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </nav>
+        <div
+          id="mobile-menu"
+          class="hidden md:hidden py-4"
+        >
+          <a
+            href="#deep-dive"
+            class="block py-2 text-center nav-link"
+            >วิเคราะห์ไอเดียหลัก</a
+          >
+          <a
+            href="#watchlist"
+            class="block py-2 text-center nav-link"
+            >Unicorn Watchlist</a
+          >
+          <a
+            href="#playbook"
+            class="block py-2 text-center nav-link"
+            >Founder's Playbook</a
+          >
         </div>
+      </div>
     </header>
 
     <main>
-        <!-- Section 1: Hero -->
-        <section id="home" class="py-16 md:py-24 bg-white">
-            <div class="container mx-auto text-center px-4">
-                <h1 class="text-4xl md:text-6xl font-bold mb-4 text-slate-800">Project Unicorn Thailand</h1>
-                <p class="text-lg md:text-2xl text-slate-600 max-w-3xl mx-auto">
-                    แผนแม่บทเชิงกลยุทธ์สู่การครองตลาด Niche และสร้างยูนิคอร์นสัญชาติไทยตัวต่อไป
-                </p>
-                <div class="mt-8">
-                    <a href="#deep-dive" class="btn-primary font-semibold py-3 px-8 rounded-full shadow-lg">
-                        เริ่มต้นสำรวจโอกาส
-                    </a>
-                </div>
-            </div>
-        </section>
+      <!-- Section 1: Hero -->
+      <section
+        id="home"
+        class="py-16 md:py-24 bg-white"
+      >
+        <div
+          class="container mx-auto text-center px-4"
+        >
+          <h1
+            class="text-4xl md:text-6xl font-bold mb-4 text-slate-800"
+          >
+            Project Unicorn Thailand
+          </h1>
+          <p
+            class="text-lg md:text-2xl text-slate-600 max-w-3xl mx-auto"
+          >
+            แผนแม่บทเชิงกลยุทธ์สู่การครองตลาด
+            Niche
+            และสร้างยูนิคอร์นสัญชาติไทยตัวต่อไป
+          </p>
+          <div class="mt-8">
+            <a
+              href="#deep-dive"
+              class="btn-primary font-semibold py-3 px-8 rounded-full shadow-lg"
+            >
+              เริ่มต้นสำรวจโอกาส
+            </a>
+          </div>
+        </div>
+      </section>
 
-        <!-- Section 2: Deep Dive on Initial Ideas -->
-        <section id="deep-dive" class="py-12 md:py-20">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-2 text-slate-800">วิเคราะห์ไอเดียเริ่มต้นเชิงลึก</h2>
-                    <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
-                        เลือกไอเดียเพื่อดูการวิเคราะห์โดยละเอียด ทั้งภาพรวมตลาด, การแข่งขัน (Magic Quadrant), ฟีเจอร์หลัก, โมเดลธุรกิจ และคำตัดสินจากผู้มีประสบการณ์
-                    </p>
-                </div>
-                
-                <div id="idea-selector" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
-                    <!-- Buttons will be generated here -->
-                </div>
+      <!-- Section 2: Deep Dive on Initial Ideas -->
+      <section
+        id="deep-dive"
+        class="py-12 md:py-20"
+      >
+        <div
+          class="container mx-auto px-4"
+        >
+          <div
+            class="text-center mb-12"
+          >
+            <h2
+              class="text-3xl md:text-4xl font-bold mb-2 text-slate-800"
+            >
+              วิเคราะห์ไอเดียเริ่มต้นเชิงลึก
+            </h2>
+            <p
+              class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto"
+            >
+              เลือกไอเดียเพื่อดูการวิเคราะห์โดยละเอียด
+              ทั้งภาพรวมตลาด, การแข่งขัน
+              (Magic Quadrant),
+              ฟีเจอร์หลัก, โมเดลธุรกิจ
+              และคำตัดสินจากผู้มีประสบการณ์
+            </p>
+          </div>
 
-                <div id="idea-content" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg transition-all duration-500 min-h-[500px]">
-                    <!-- Content will be injected here -->
-                </div>
-            </div>
-        </section>
+          <div
+            id="idea-selector"
+            class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8"
+          >
+            <!-- Buttons will be generated here -->
+          </div>
 
-        <!-- Section 3: Unicorn Watchlist -->
-        <section id="watchlist" class="py-12 md:py-20 bg-slate-50">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-2 text-slate-800">The Unicorn Watchlist</h2>
-                    <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
-                        20 ไอเดียธุรกิจที่มีศักยภาพสูงสำหรับตลาดไทย กรองตามหมวดหมู่หรือจัดลำดับตามคะแนนเพื่อหาโอกาสที่น่าสนใจที่สุด <strong class="text-emerald-600 block md:inline mt-1">คลิกที่แถว/การ์ดเพื่อดูรายละเอียด</strong>
-                    </p>
-                </div>
+          <div
+            id="idea-content"
+            class="bg-white p-6 md:p-8 rounded-2xl shadow-lg transition-all duration-500 min-h-[500px]"
+          >
+            <!-- Content will be injected here -->
+          </div>
+        </div>
+      </section>
 
-                <div id="watchlist-filters" class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8">
-                     <!-- Filter buttons will be generated here -->
-                </div>
-                
-                <div class="responsive-table-wrapper">
-                    <table class="w-full min-w-[800px] md:min-w-full text-left responsive-table">
-                        <thead class="border-b-2 border-slate-200 bg-white">
-                            <tr>
-                                <th class="p-4 font-semibold text-slate-700 sortable" data-sort="idea">ไอเดีย</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable" data-sort="group">กลุ่มธุรกิจ</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable text-center" data-sort="problem">คะแนนปัญหา</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable text-center" data-sort="market">ขนาดตลาด</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable text-center" data-sort="cost">ต้นทุนต่ำ</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable text-center" data-sort="scale">ขยายตัวได้</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable text-center" data-sort="moat">Moat</th>
-                                <th class="p-4 font-semibold text-slate-700 sortable text-center" data-sort="total">คะแนนรวม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="watchlist-table-body">
-                            <!-- Table rows will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+      <!-- Section 3: Unicorn Watchlist -->
+      <section
+        id="watchlist"
+        class="py-12 md:py-20 bg-slate-50"
+      >
+        <div
+          class="container mx-auto px-4"
+        >
+          <div
+            class="text-center mb-12"
+          >
+            <h2
+              class="text-3xl md:text-4xl font-bold mb-2 text-slate-800"
+            >
+              The Unicorn Watchlist
+            </h2>
+            <p
+              class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto"
+            >
+              20
+              ไอเดียธุรกิจที่มีศักยภาพสูงสำหรับตลาดไทย
+              กรองตามหมวดหมู่หรือจัดลำดับตามคะแนนเพื่อหาโอกาสที่น่าสนใจที่สุด
+              <strong
+                class="text-emerald-600 block md:inline mt-1"
+                >คลิกที่แถว/การ์ดเพื่อดูรายละเอียด</strong
+              >
+            </p>
+          </div>
 
-        <!-- Section 4: Founder's Playbook -->
-        <section id="playbook" class="py-12 md:py-20">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-2 text-slate-800">The Founder's Playbook</h2>
-                    <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
-                        กลยุทธ์และแนวทางปฏิบัติ จากแผนแม่บทสู่ความเป็นจริง
-                    </p>
-                </div>
+          <div
+            id="watchlist-filters"
+            class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8"
+          >
+            <!-- Filter buttons will be generated here -->
+          </div>
 
-                <div id="accordion-container" class="max-w-3xl mx-auto space-y-4">
-                     <!-- Accordion items will be generated here -->
-                </div>
-            </div>
-        </section>
+          <div
+            class="responsive-table-wrapper"
+          >
+            <table
+              class="w-full min-w-[800px] md:min-w-full text-left responsive-table"
+            >
+              <thead
+                class="border-b-2 border-slate-200 bg-white"
+              >
+                <tr>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable"
+                    data-sort="idea"
+                  >
+                    ไอเดีย
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable"
+                    data-sort="group"
+                  >
+                    กลุ่มธุรกิจ
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable text-center"
+                    data-sort="problem"
+                  >
+                    คะแนนปัญหา
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable text-center"
+                    data-sort="market"
+                  >
+                    ขนาดตลาด
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable text-center"
+                    data-sort="cost"
+                  >
+                    ต้นทุนต่ำ
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable text-center"
+                    data-sort="scale"
+                  >
+                    ขยายตัวได้
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable text-center"
+                    data-sort="moat"
+                  >
+                    Moat
+                  </th>
+                  <th
+                    class="p-4 font-semibold text-slate-700 sortable text-center"
+                    data-sort="total"
+                  >
+                    คะแนนรวม
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="watchlist-table-body"
+              >
+                <!-- Table rows will be injected here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Founder's Playbook -->
+      <section
+        id="playbook"
+        class="py-12 md:py-20"
+      >
+        <div
+          class="container mx-auto px-4"
+        >
+          <div
+            class="text-center mb-12"
+          >
+            <h2
+              class="text-3xl md:text-4xl font-bold mb-2 text-slate-800"
+            >
+              The Founder's Playbook
+            </h2>
+            <p
+              class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto"
+            >
+              กลยุทธ์และแนวทางปฏิบัติ
+              จากแผนแม่บทสู่ความเป็นจริง
+            </p>
+          </div>
+
+          <div
+            id="accordion-container"
+            class="max-w-3xl mx-auto space-y-4"
+          >
+            <!-- Accordion items will be generated here -->
+          </div>
+        </div>
+      </section>
     </main>
 
-    <footer class="bg-slate-800 text-white py-8">
-        <div class="container mx-auto text-center px-4">
-            <p>&copy; 2025 Project Unicorn Thailand. สร้างสรรค์เพื่อขับเคลื่อนระบบนิเวศสตาร์ทอัพไทย</p>
-        </div>
+    <footer
+      class="bg-slate-800 text-white py-8"
+    >
+      <div
+        class="container mx-auto text-center px-4"
+      >
+        <p>
+          &copy; 2025 Project Unicorn
+          Thailand.
+          สร้างสรรค์เพื่อขับเคลื่อนระบบนิเวศสตาร์ทอัพไทย
+        </p>
+      </div>
     </footer>
 
     <!-- Watchlist Modal -->
-    <div id="watchlist-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4 modal-enter">
-        <div id="modal-content-wrapper" class="bg-white rounded-2xl shadow-xl max-w-2xl w-full relative max-h-[90vh] overflow-y-auto modal-content-enter">
-            <button id="modal-close-btn" class="sticky top-4 right-4 float-right text-3xl font-bold text-slate-400 hover:text-slate-700 z-10 bg-white/50 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center">&times;</button>
-            <div id="modal-content" class="p-6 md:p-8">
-                <!-- Detailed content will be injected here -->
-            </div>
+    <div
+      id="watchlist-modal"
+      class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4 modal-enter"
+    >
+      <div
+        id="modal-content-wrapper"
+        class="bg-white rounded-2xl shadow-xl max-w-2xl w-full relative max-h-[90vh] overflow-y-auto modal-content-enter"
+      >
+        <button
+          id="modal-close-btn"
+          class="sticky top-4 right-4 float-right text-3xl font-bold text-slate-400 hover:text-slate-700 z-10 bg-white/50 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center"
+        >
+          &times;
+        </button>
+        <div
+          id="modal-content"
+          class="p-6 md:p-8"
+        >
+          <!-- Detailed content will be injected here -->
         </div>
+      </div>
     </div>
 
-
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+          // --- Data ---
+          const deepDiveData = {
+            "flow-protocol": {
+              title:
+                "Flow Protocol: นิยามใหม่ของการจัดการคิวและทรัพยากร",
+              overview:
+                "แพลตฟอร์มครบวงจรที่ขับเคลื่อนด้วย AI สำหรับการจองและจัดการทรัพยากรที่มีช่วงเวลาจำกัด (Time-slotted resources) ซึ่งครอบคลุมมากกว่าแค่การจัดการคิวทั่วไป แต่รวมถึงที่จอดรถอัจฉริยะ, การนัดหมายบริการ และการจองสิ่งอำนวยความสะดวก คุณค่าหลักคือการขจัดเวลาที่สูญเปล่าสำหรับผู้บริโภคและเพิ่มประสิทธิภาพการใช้ทรัพยากรสำหรับธุรกิจ",
+              features: [
+                {
+                  title:
+                    "สำหรับผู้บริโภค",
+                  detail:
+                    'อินเทอร์เฟซแบบแผนที่เดียวเพื่อค้นหาและจอง, อัปเดตสถานะคิวเรียลไทม์, ชำระเงินในตัว, QR Code เดียว ("Flow Pass")',
+                },
+                {
+                  title: "สำหรับธุรกิจ",
+                  detail:
+                    "แดชบอร์ดจัดการการจองและความจุ, การวิเคราะห์ชั่วโมงเร่งด่วน, กำหนดราคาแบบไดนามิก",
+                },
+                {
+                  title: "AI-Powered",
+                  detail:
+                    "ระบบคาดการณ์เพื่อแนะนำช่วงเวลาที่ดีที่สุด, นำทางไปยังที่จอดรถว่าง, พยากรณ์ความต้องการสำหรับธุรกิจ",
+                },
+              ],
+              swot: {
+                s: "ตอบโจทย์ Pain Point ที่มีความถี่สูง, มี Network Effect ที่แข็งแกร่ง",
+                w: "การสร้างตลาดสองด้านเป็นเรื่องท้าทาย, วงจรการขาย B2B อาจนาน",
+                o: "ขยายไปสู่ธุรกิจการจองอื่นๆ (ตั๋วอีเวนต์, Co-working space)",
+                t: "ผู้เล่นรายใหญ่อย่าง Grab อาจเพิ่มฟีเจอร์คล้ายกัน",
+              },
+              verdict:
+                "มีศักยภาพสูงแต่ต้องใช้การดำเนินงานที่เข้มข้น ความสำเร็จขึ้นอยู่กับการเจาะตลาด B2B ในช่วงแรกเพื่อสร้างเครือข่ายให้ได้ กุญแจสำคัญคือการมุ่งเน้นไปที่ตลาดแนวดิ่งที่มีความหนาแน่นสูงเพียงแห่งเดียวก่อน (เช่น ห้างสรรพสินค้า) แล้วจึงขยายต่อไป",
+              magicQuadrant: {
+                title:
+                  "Magic Quadrant: การจัดการคิวและทรัพยากรในไทย",
+                xLabel:
+                  "ประสบการณ์ผู้ใช้แบบครบวงจร (Unified User Experience)",
+                yLabel:
+                  "ระบบธุรกิจอัจฉริยะและการเพิ่มประสิทธิภาพ (BI & Optimization)",
+                data: [
+                  {
+                    x: 2,
+                    y: 3,
+                    label:
+                      "แอปจองทั่วไป",
+                  },
+                  {
+                    x: 3,
+                    y: 8,
+                    label:
+                      "QueueBee, gtechna, Siemens",
+                  },
+                  {
+                    x: 9,
+                    y: 9,
+                    label:
+                      "Flow Protocol (เป้าหมาย)",
+                  },
+                ],
+              },
+            },
+            "kin-vest": {
+              title:
+                "Kin-vest: ระบบปฏิบัติการทางการเงินเชิงรุกสำหรับครอบครัวและบุคคล",
+              overview:
+                "แพลตฟอร์มการจัดการการเงินแบบองค์รวมที่ออกแบบมาเพื่อครอบครัวและบุคคลยุคใหม่ ก้าวไปไกลกว่าการทำงบประมาณทั่วไปด้วยการรวมการติดตามค่าใช้จ่าย, การเงินร่วมกันของครอบครัว, การจ่ายบิล, การจัดการการสมัครสมาชิก และคำแนะนำทางการเงินเชิงรุกที่ขับเคลื่อนด้วย AI",
+              features: [
+                {
+                  title: "แดชบอร์ดรวม",
+                  detail:
+                    "มุมมองเดียวที่รวมบัญชีธนาคาร, บัตรเครดิต, และพอร์ตการลงทุน",
+                },
+                {
+                  title:
+                    "Family Vaults",
+                  detail:
+                    'เวอร์ชันขั้นสูงของ "Cloud Pockets" สำหรับเป้าหมายร่วมกัน',
+                },
+                {
+                  title:
+                    "Subscription Slayer",
+                  detail:
+                    "ระบุและยกเลิกการชำระเงินที่เกิดขึ้นประจำได้ในคลิกเดียว",
+                },
+                {
+                  title:
+                    'AI "Kin-sight"',
+                  detail:
+                    'ให้คำแนะนำเชิงรุกที่ปรับให้เหมาะกับแต่ละบุคคล เช่น "ค่าใช้จ่ายของชำของคุณสูงขึ้น 15% นี่คือโปรโมชันใกล้บ้าน"',
+                },
+              ],
+              swot: {
+                s: "สร้างความผูกพันกับผู้ใช้สูง, มีศักยภาพสร้างรายได้หลายช่องทาง",
+                w: "ต้องการความไว้วางใจสูงและระบบความปลอดภัยที่แข็งแกร่ง, การปฏิบัติตามกฎระเบียบซับซ้อน",
+                o: "ขยายสู่การจัดการการเงินสำหรับ SME หรือ White-label ให้ธนาคาร",
+                t: "ธนาคารรายใหญ่อาจพัฒนาผลิตภัณฑ์ของตนให้ครอบคลุมมากขึ้น",
+              },
+              verdict:
+                "เป็นไอเดียที่แข็งแกร่งมากและมีโอกาสเป็นยูนิคอร์น กุญแจสำคัญคือการสร้างความไว้วางใจผ่านระบบความปลอดภัยระดับโลกและการออกแบบที่เน้นผู้ใช้เป็นศูนย์กลาง คำแนะนำเชิงรุกที่ขับเคลื่อนด้วย AI คือตัวสร้างความแตกต่างที่สำคัญ",
+              magicQuadrant: {
+                title:
+                  "Magic Quadrant: การเงินส่วนบุคคลในไทย",
+                xLabel:
+                  "ความครอบคลุมของฟีเจอร์ (Comprehensiveness of Features)",
+                yLabel:
+                  "ความสามารถเชิงรุกและระบบอัตโนมัติ (Proactive Intelligence & Automation)",
+                data: [
+                  {
+                    x: 3,
+                    y: 2,
+                    label: "Piggipo",
+                  },
+                  {
+                    x: 4,
+                    y: 4,
+                    label:
+                      "MAKE by KBank",
+                  },
+                  {
+                    x: 8,
+                    y: 3,
+                    label:
+                      "แอปธนาคาร (K PLUS)",
+                  },
+                  {
+                    x: 9,
+                    y: 9,
+                    label:
+                      "Kin-vest (เป้าหมาย)",
+                  },
+                ],
+              },
+            },
+            "co-link": {
+              title:
+                "Co-Link: ระบบนิเวศสำหรับการสร้างทีมสตาร์ทอัพ",
+              overview:
+                'แพลตฟอร์มที่คัดสรรและขับเคลื่อนด้วย AI ซึ่งออกแบบมาเพื่อเชื่อมโยงผู้ก่อตั้ง, สมาชิกในทีม และนักลงทุนระยะเริ่มต้นที่มีคุณภาพสูง ไม่ใช่แค่กระดานประกาศ แต่เป็น "YC Co-founder Matching สำหรับ SEA" ที่เน้นการตรวจสอบ, การจับคู่ความเข้ากันได้ และการอำนวยความสะดวกในการปฏิสัมพันธ์',
+              features: [
+                {
+                  title:
+                    "โปรไฟล์ที่ผ่านการตรวจสอบ",
+                  detail:
+                    "กระบวนการตรวจสอบภาคบังคับ (เช่น เชื่อมโยงกับ GitHub/Portfolio/LinkedIn)",
+                },
+                {
+                  title:
+                    "โปรไฟล์เชิงลึก",
+                  detail:
+                    "นอกเหนือจากทักษะ ยังรวมถึงสไตล์การทำงาน, ค่านิยม, การยอมรับความเสี่ยง",
+                },
+                {
+                  title:
+                    '"Trial Sprint" Framework',
+                  detail:
+                    "ฟีเจอร์แนะนำโครงการทดลอง 1-2 สัปดาห์เพื่อทดสอบความเข้ากันได้",
+                },
+                {
+                  title: "AI Matching",
+                  detail:
+                    "อัลกอริทึมจับคู่ที่พิจารณาทักษะและความเข้ากันได้ทางจิตวิทยา",
+                },
+              ],
+              swot: {
+                s: "แก้ปัญหาที่สำคัญอย่างยิ่ง, มี Network Effect ที่แข็งแกร่ง",
+                w: 'ปัญหา "ไก่กับไข่": ต้องการผู้ใช้คุณภาพสูงจำนวนมากเพื่อให้มีคุณค่า',
+                o: "กลายเป็นแพลตฟอร์มผู้มีความสามารถที่สำคัญใน SEA ทั้งหมด",
+                t: "VC ระดับภูมิภาคอาจเปิดตัวแพลตฟอร์มที่คล้ายกัน",
+              },
+              verdict:
+                "เป็นไอเดียที่ยอดเยี่ยมและมีความได้เปรียบที่ป้องกันได้ชัดเจนหากดำเนินการได้ดี กุญแจสำคัญคือการมุ่งเน้นที่คุณภาพและการคัดกรองอย่างจริงจังตั้งแต่วันแรก ควรเป็นพันธมิตรกับ VC และ Incubator ชั้นนำในท้องถิ่น",
+              magicQuadrant: {
+                title:
+                  "Magic Quadrant: การจับคู่ผู้ก่อตั้ง",
+                xLabel:
+                  "การคัดกรองและการตรวจสอบ (Curation & Verification)",
+                yLabel:
+                  "ความสามารถในการจับคู่และเครื่องมือ (Matching Intelligence & Tools)",
+                data: [
+                  {
+                    x: 2,
+                    y: 2,
+                    label:
+                      "กลุ่ม Facebook/LinkedIn",
+                  },
+                  {
+                    x: 3,
+                    y: 6,
+                    label:
+                      "YC Co-founder Matching",
+                  },
+                  {
+                    x: 7,
+                    y: 3,
+                    label:
+                      "โครงการบ่มเพาะ ม.",
+                  },
+                  {
+                    x: 9,
+                    y: 9,
+                    label:
+                      "Co-Link (เป้าหมาย)",
+                  },
+                ],
+              },
+            },
+            aegis: {
+              title:
+                "Aegis: แพลตฟอร์มตรวจสอบความปลอดภัยอัตโนมัติ 360°",
+              overview:
+                "แพลตฟอร์ม SaaS ที่ให้บริการตรวจสอบความปลอดภัยอัตโนมัติและครอบคลุมสำหรับ SME โดยจะสแกนหาช่องโหว่ในเว็บแอปพลิเคชัน, API และแอปบนมือถือ พร้อมทั้งให้รายงานที่ชัดเจนและนำไปปฏิบัติได้ เป็นการทำให้ความปลอดภัยเป็นเรื่องเข้าถึงได้สำหรับบริษัทที่ไม่สามารถจ้างทีมรักษาความปลอดภัยเต็มเวลา",
+              features: [
+                {
+                  title:
+                    "One-Click Scan",
+                  detail:
+                    "ผู้ใช้เพียงแค่ป้อน URL หรืออัปโหลดไฟล์เพื่อเริ่มการสแกน",
+                },
+                {
+                  title:
+                    "Unified Dashboard",
+                  detail:
+                    'แดชบอร์ดที่ชัดเจน แสดง "คะแนน" ความปลอดภัยและช่องโหว่ที่สำคัญ',
+                },
+                {
+                  title:
+                    "Actionable Reports",
+                  detail:
+                    "รายงานที่อธิบายช่องโหว่ด้วยภาษาที่เข้าใจง่าย พร้อมตัวอย่างโค้ดแก้ไข",
+                },
+                {
+                  title:
+                    "AI Assistance",
+                  detail:
+                    "ใช้ AI เพื่อลด False Positives, จัดลำดับความสำคัญภัยคุกคาม และแนะนำการแก้ไข",
+                },
+              ],
+              swot: {
+                s: "ตอบสนองความต้องการทางธุรกิจที่สำคัญด้วย ROI ที่ชัดเจน, เป็นโมเดลรายได้ประจำ",
+                w: "ต้องใช้ความเชี่ยวชาญทางเทคนิคสูง, การขายอาจท้าทาย (มองว่าเป็น Cost Center)",
+                o: "ขยายสู่บริการความปลอดภัยอื่นๆ เช่น การฝึกอบรม, การจำลองฟิชชิง",
+                t: "ผู้ให้บริการคลาวด์รายใหญ่ (AWS, Google) อาจมีเครื่องมือที่คล้ายกัน",
+              },
+              verdict:
+                "เป็นธุรกิจ B2B SaaS ที่แข็งแกร่ง ตลาดนี้ได้รับการพิสูจน์แล้วในระดับโลก และความต้องการในไทยก็ไม่อาจปฏิเสธได้ ความสำเร็จขึ้นอยู่กับการสร้าง UX ที่เรียบง่ายและเป็นมิตรกับนักพัฒนาอย่างแท้จริง",
+              magicQuadrant: {
+                title:
+                  "Magic Quadrant: การตรวจสอบความปลอดภัยของ SME",
+                xLabel:
+                  "ความง่ายในการใช้งานและระบบอัตโนมัติ (Ease of Use & Automation)",
+                yLabel:
+                  "ความครอบคลุมของการตรวจสอบ (Comprehensiveness of Audit)",
+                data: [
+                  {
+                    x: 3,
+                    y: 3,
+                    label:
+                      "เครื่องมือ Open-Source",
+                  },
+                  {
+                    x: 4,
+                    y: 9,
+                    label:
+                      "บริษัท Pen-Testing",
+                  },
+                  {
+                    x: 9,
+                    y: 9,
+                    label:
+                      "Aegis (เป้าหมาย)",
+                  },
+                ],
+              },
+            },
+          };
 
-        // --- Data ---
-        const deepDiveData = {
-            'flow-protocol': {
-                title: 'Flow Protocol: นิยามใหม่ของการจัดการคิวและทรัพยากร',
-                overview: 'แพลตฟอร์มครบวงจรที่ขับเคลื่อนด้วย AI สำหรับการจองและจัดการทรัพยากรที่มีช่วงเวลาจำกัด (Time-slotted resources) ซึ่งครอบคลุมมากกว่าแค่การจัดการคิวทั่วไป แต่รวมถึงที่จอดรถอัจฉริยะ, การนัดหมายบริการ และการจองสิ่งอำนวยความสะดวก คุณค่าหลักคือการขจัดเวลาที่สูญเปล่าสำหรับผู้บริโภคและเพิ่มประสิทธิภาพการใช้ทรัพยากรสำหรับธุรกิจ',
-                features: [
-                    { title: 'สำหรับผู้บริโภค', detail: 'อินเทอร์เฟซแบบแผนที่เดียวเพื่อค้นหาและจอง, อัปเดตสถานะคิวเรียลไทม์, ชำระเงินในตัว, QR Code เดียว ("Flow Pass")' },
-                    { title: 'สำหรับธุรกิจ', detail: 'แดชบอร์ดจัดการการจองและความจุ, การวิเคราะห์ชั่วโมงเร่งด่วน, กำหนดราคาแบบไดนามิก' },
-                    { title: 'AI-Powered', detail: 'ระบบคาดการณ์เพื่อแนะนำช่วงเวลาที่ดีที่สุด, นำทางไปยังที่จอดรถว่าง, พยากรณ์ความต้องการสำหรับธุรกิจ' }
-                ],
-                swot: {
-                    s: 'ตอบโจทย์ Pain Point ที่มีความถี่สูง, มี Network Effect ที่แข็งแกร่ง',
-                    w: 'การสร้างตลาดสองด้านเป็นเรื่องท้าทาย, วงจรการขาย B2B อาจนาน',
-                    o: 'ขยายไปสู่ธุรกิจการจองอื่นๆ (ตั๋วอีเวนต์, Co-working space)',
-                    t: 'ผู้เล่นรายใหญ่อย่าง Grab อาจเพิ่มฟีเจอร์คล้ายกัน'
-                },
-                verdict: 'มีศักยภาพสูงแต่ต้องใช้การดำเนินงานที่เข้มข้น ความสำเร็จขึ้นอยู่กับการเจาะตลาด B2B ในช่วงแรกเพื่อสร้างเครือข่ายให้ได้ กุญแจสำคัญคือการมุ่งเน้นไปที่ตลาดแนวดิ่งที่มีความหนาแน่นสูงเพียงแห่งเดียวก่อน (เช่น ห้างสรรพสินค้า) แล้วจึงขยายต่อไป',
-                magicQuadrant: {
-                    title: 'Magic Quadrant: การจัดการคิวและทรัพยากรในไทย',
-                    xLabel: 'ประสบการณ์ผู้ใช้แบบครบวงจร (Unified User Experience)',
-                    yLabel: 'ระบบธุรกิจอัจฉริยะและการเพิ่มประสิทธิภาพ (BI & Optimization)',
-                    data: [
-                        { x: 2, y: 3, label: 'แอปจองทั่วไป' },
-                        { x: 3, y: 8, label: 'QueueBee, gtechna, Siemens' },
-                        { x: 9, y: 9, label: 'Flow Protocol (เป้าหมาย)' }
-                    ]
-                }
+          const watchlistData = [
+            {
+              id: 1,
+              idea: "SME Financial Cockpit",
+              group: "FinTech",
+              problem: 5,
+              market: 4,
+              cost: 4,
+              scale: 5,
+              moat: 4,
+              total: 22,
             },
-            'kin-vest': {
-                title: 'Kin-vest: ระบบปฏิบัติการทางการเงินเชิงรุกสำหรับครอบครัวและบุคคล',
-                overview: 'แพลตฟอร์มการจัดการการเงินแบบองค์รวมที่ออกแบบมาเพื่อครอบครัวและบุคคลยุคใหม่ ก้าวไปไกลกว่าการทำงบประมาณทั่วไปด้วยการรวมการติดตามค่าใช้จ่าย, การเงินร่วมกันของครอบครัว, การจ่ายบิล, การจัดการการสมัครสมาชิก และคำแนะนำทางการเงินเชิงรุกที่ขับเคลื่อนด้วย AI',
-                features: [
-                    { title: 'แดชบอร์ดรวม', detail: 'มุมมองเดียวที่รวมบัญชีธนาคาร, บัตรเครดิต, และพอร์ตการลงทุน' },
-                    { title: 'Family Vaults', detail: 'เวอร์ชันขั้นสูงของ "Cloud Pockets" สำหรับเป้าหมายร่วมกัน' },
-                    { title: 'Subscription Slayer', detail: 'ระบุและยกเลิกการชำระเงินที่เกิดขึ้นประจำได้ในคลิกเดียว' },
-                    { title: 'AI "Kin-sight"', detail: 'ให้คำแนะนำเชิงรุกที่ปรับให้เหมาะกับแต่ละบุคคล เช่น "ค่าใช้จ่ายของชำของคุณสูงขึ้น 15% นี่คือโปรโมชันใกล้บ้าน"' }
-                ],
-                swot: {
-                    s: 'สร้างความผูกพันกับผู้ใช้สูง, มีศักยภาพสร้างรายได้หลายช่องทาง',
-                    w: 'ต้องการความไว้วางใจสูงและระบบความปลอดภัยที่แข็งแกร่ง, การปฏิบัติตามกฎระเบียบซับซ้อน',
-                    o: 'ขยายสู่การจัดการการเงินสำหรับ SME หรือ White-label ให้ธนาคาร',
-                    t: 'ธนาคารรายใหญ่อาจพัฒนาผลิตภัณฑ์ของตนให้ครอบคลุมมากขึ้น'
-                },
-                verdict: 'เป็นไอเดียที่แข็งแกร่งมากและมีโอกาสเป็นยูนิคอร์น กุญแจสำคัญคือการสร้างความไว้วางใจผ่านระบบความปลอดภัยระดับโลกและการออกแบบที่เน้นผู้ใช้เป็นศูนย์กลาง คำแนะนำเชิงรุกที่ขับเคลื่อนด้วย AI คือตัวสร้างความแตกต่างที่สำคัญ',
-                magicQuadrant: {
-                    title: 'Magic Quadrant: การเงินส่วนบุคคลในไทย',
-                    xLabel: 'ความครอบคลุมของฟีเจอร์ (Comprehensiveness of Features)',
-                    yLabel: 'ความสามารถเชิงรุกและระบบอัตโนมัติ (Proactive Intelligence & Automation)',
-                    data: [
-                        { x: 3, y: 2, label: 'Piggipo' },
-                        { x: 4, y: 4, label: 'MAKE by KBank' },
-                        { x: 8, y: 3, label: 'แอปธนาคาร (K PLUS)' },
-                        { x: 9, y: 9, label: 'Kin-vest (เป้าหมาย)' }
-                    ]
-                }
+            {
+              id: 13,
+              idea: "Moo Baan OS",
+              group: "PropTech",
+              problem: 5,
+              market: 4,
+              cost: 4,
+              scale: 4,
+              moat: 5,
+              total: 22,
             },
-            'co-link': {
-                title: 'Co-Link: ระบบนิเวศสำหรับการสร้างทีมสตาร์ทอัพ',
-                overview: 'แพลตฟอร์มที่คัดสรรและขับเคลื่อนด้วย AI ซึ่งออกแบบมาเพื่อเชื่อมโยงผู้ก่อตั้ง, สมาชิกในทีม และนักลงทุนระยะเริ่มต้นที่มีคุณภาพสูง ไม่ใช่แค่กระดานประกาศ แต่เป็น "YC Co-founder Matching สำหรับ SEA" ที่เน้นการตรวจสอบ, การจับคู่ความเข้ากันได้ และการอำนวยความสะดวกในการปฏิสัมพันธ์',
-                features: [
-                    { title: 'โปรไฟล์ที่ผ่านการตรวจสอบ', detail: 'กระบวนการตรวจสอบภาคบังคับ (เช่น เชื่อมโยงกับ GitHub/Portfolio/LinkedIn)' },
-                    { title: 'โปรไฟล์เชิงลึก', detail: 'นอกเหนือจากทักษะ ยังรวมถึงสไตล์การทำงาน, ค่านิยม, การยอมรับความเสี่ยง' },
-                    { title: '"Trial Sprint" Framework', detail: 'ฟีเจอร์แนะนำโครงการทดลอง 1-2 สัปดาห์เพื่อทดสอบความเข้ากันได้' },
-                    { title: 'AI Matching', detail: 'อัลกอริทึมจับคู่ที่พิจารณาทักษะและความเข้ากันได้ทางจิตวิทยา' }
-                ],
-                swot: {
-                    s: 'แก้ปัญหาที่สำคัญอย่างยิ่ง, มี Network Effect ที่แข็งแกร่ง',
-                    w: 'ปัญหา "ไก่กับไข่": ต้องการผู้ใช้คุณภาพสูงจำนวนมากเพื่อให้มีคุณค่า',
-                    o: 'กลายเป็นแพลตฟอร์มผู้มีความสามารถที่สำคัญใน SEA ทั้งหมด',
-                    t: 'VC ระดับภูมิภาคอาจเปิดตัวแพลตฟอร์มที่คล้ายกัน'
-                },
-                verdict: 'เป็นไอเดียที่ยอดเยี่ยมและมีความได้เปรียบที่ป้องกันได้ชัดเจนหากดำเนินการได้ดี กุญแจสำคัญคือการมุ่งเน้นที่คุณภาพและการคัดกรองอย่างจริงจังตั้งแต่วันแรก ควรเป็นพันธมิตรกับ VC และ Incubator ชั้นนำในท้องถิ่น',
-                 magicQuadrant: {
-                    title: 'Magic Quadrant: การจับคู่ผู้ก่อตั้ง',
-                    xLabel: 'การคัดกรองและการตรวจสอบ (Curation & Verification)',
-                    yLabel: 'ความสามารถในการจับคู่และเครื่องมือ (Matching Intelligence & Tools)',
-                    data: [
-                        { x: 2, y: 2, label: 'กลุ่ม Facebook/LinkedIn' },
-                        { x: 3, y: 6, label: 'YC Co-founder Matching' },
-                        { x: 7, y: 3, label: 'โครงการบ่มเพาะ ม.' },
-                        { x: 9, y: 9, label: 'Co-Link (เป้าหมาย)' }
-                    ]
-                }
+            {
+              id: 10,
+              idea: "Farm-to-Restaurant Marketplace",
+              group: "AgriTech",
+              problem: 5,
+              market: 5,
+              cost: 3,
+              scale: 4,
+              moat: 4,
+              total: 21,
             },
-            'aegis': {
-                title: 'Aegis: แพลตฟอร์มตรวจสอบความปลอดภัยอัตโนมัติ 360°',
-                overview: 'แพลตฟอร์ม SaaS ที่ให้บริการตรวจสอบความปลอดภัยอัตโนมัติและครอบคลุมสำหรับ SME โดยจะสแกนหาช่องโหว่ในเว็บแอปพลิเคชัน, API และแอปบนมือถือ พร้อมทั้งให้รายงานที่ชัดเจนและนำไปปฏิบัติได้ เป็นการทำให้ความปลอดภัยเป็นเรื่องเข้าถึงได้สำหรับบริษัทที่ไม่สามารถจ้างทีมรักษาความปลอดภัยเต็มเวลา',
-                features: [
-                    { title: 'One-Click Scan', detail: 'ผู้ใช้เพียงแค่ป้อน URL หรืออัปโหลดไฟล์เพื่อเริ่มการสแกน' },
-                    { title: 'Unified Dashboard', detail: 'แดชบอร์ดที่ชัดเจน แสดง "คะแนน" ความปลอดภัยและช่องโหว่ที่สำคัญ' },
-                    { title: 'Actionable Reports', detail: 'รายงานที่อธิบายช่องโหว่ด้วยภาษาที่เข้าใจง่าย พร้อมตัวอย่างโค้ดแก้ไข' },
-                    { title: 'AI Assistance', detail: 'ใช้ AI เพื่อลด False Positives, จัดลำดับความสำคัญภัยคุกคาม และแนะนำการแก้ไข' }
-                ],
-                swot: {
-                    s: 'ตอบสนองความต้องการทางธุรกิจที่สำคัญด้วย ROI ที่ชัดเจน, เป็นโมเดลรายได้ประจำ',
-                    w: 'ต้องใช้ความเชี่ยวชาญทางเทคนิคสูง, การขายอาจท้าทาย (มองว่าเป็น Cost Center)',
-                    o: 'ขยายสู่บริการความปลอดภัยอื่นๆ เช่น การฝึกอบรม, การจำลองฟิชชิง',
-                    t: 'ผู้ให้บริการคลาวด์รายใหญ่ (AWS, Google) อาจมีเครื่องมือที่คล้ายกัน'
-                },
-                verdict: 'เป็นธุรกิจ B2B SaaS ที่แข็งแกร่ง ตลาดนี้ได้รับการพิสูจน์แล้วในระดับโลก และความต้องการในไทยก็ไม่อาจปฏิเสธได้ ความสำเร็จขึ้นอยู่กับการสร้าง UX ที่เรียบง่ายและเป็นมิตรกับนักพัฒนาอย่างแท้จริง',
-                magicQuadrant: {
-                    title: 'Magic Quadrant: การตรวจสอบความปลอดภัยของ SME',
-                    xLabel: 'ความง่ายในการใช้งานและระบบอัตโนมัติ (Ease of Use & Automation)',
-                    yLabel: 'ความครอบคลุมของการตรวจสอบ (Comprehensiveness of Audit)',
-                    data: [
-                        { x: 3, y: 3, label: 'เครื่องมือ Open-Source' },
-                        { x: 4, y: 9, label: 'บริษัท Pen-Testing' },
-                        { x: 9, y: 9, label: 'Aegis (เป้าหมาย)' }
-                    ]
-                }
-            }
-        };
+            {
+              id: 14,
+              idea: "Rental Lifecycle Management",
+              group: "PropTech",
+              problem: 4,
+              market: 4,
+              cost: 4,
+              scale: 5,
+              moat: 4,
+              total: 21,
+            },
+            {
+              id: 4,
+              idea: "B2B Marketplace for OTOP",
+              group: "SME/Enterprise",
+              problem: 4,
+              market: 5,
+              cost: 4,
+              scale: 4,
+              moat: 3,
+              total: 20,
+            },
+            {
+              id: 6,
+              idea: "AI Logistics Optimizer",
+              group: "SME/Enterprise",
+              problem: 4,
+              market: 4,
+              cost: 4,
+              scale: 5,
+              moat: 3,
+              total: 20,
+            },
+            {
+              id: 20,
+              idea: "EV Charging Network App",
+              group: "Sustainability",
+              problem: 4,
+              market: 5,
+              cost: 2,
+              scale: 5,
+              moat: 4,
+              total: 20,
+            },
+            {
+              id: 2,
+              idea: "AI Insurance Aggregator",
+              group: "FinTech",
+              problem: 4,
+              market: 4,
+              cost: 4,
+              scale: 4,
+              moat: 3,
+              total: 19,
+            },
+            {
+              id: 5,
+              idea: "Vertical SaaS for Spas",
+              group: "SME/Enterprise",
+              problem: 4,
+              market: 3,
+              cost: 4,
+              scale: 4,
+              moat: 4,
+              total: 19,
+            },
+            {
+              id: 11,
+              idea: "IoT Water Management",
+              group: "AgriTech",
+              problem: 5,
+              market: 4,
+              cost: 2,
+              scale: 4,
+              moat: 4,
+              total: 19,
+            },
+            {
+              id: 12,
+              idea: "Crop-Disease Diagnosis App",
+              group: "AgriTech",
+              problem: 5,
+              market: 4,
+              cost: 3,
+              scale: 4,
+              moat: 3,
+              total: 19,
+            },
+            {
+              id: 16,
+              idea: "Hyperlocal Skills Exchange",
+              group: "Lifestyle",
+              problem: 4,
+              market: 3,
+              cost: 5,
+              scale: 3,
+              moat: 3,
+              total: 18,
+            },
+            {
+              id: 19,
+              idea: "Waste Management Marketplace",
+              group: "Sustainability",
+              problem: 4,
+              market: 4,
+              cost: 3,
+              scale: 4,
+              moat: 3,
+              total: 18,
+            },
+            {
+              id: 3,
+              idea: "AI Robo-Advisor",
+              group: "FinTech",
+              problem: 3,
+              market: 4,
+              cost: 3,
+              scale: 5,
+              moat: 2,
+              total: 17,
+            },
+            {
+              id: 7,
+              idea: "Hyperlocal Group Buy",
+              group:
+                "Retail/E-commerce",
+              problem: 3,
+              market: 4,
+              cost: 4,
+              scale: 4,
+              moat: 2,
+              total: 17,
+            },
+            {
+              id: 15,
+              idea: "Fractional Vacation Homes",
+              group: "PropTech",
+              problem: 3,
+              market: 3,
+              cost: 2,
+              scale: 4,
+              moat: 4,
+              total: 16,
+            },
+            {
+              id: 8,
+              idea: "AR Virtual Try-On",
+              group:
+                "Retail/E-commerce",
+              problem: 3,
+              market: 3,
+              cost: 3,
+              scale: 4,
+              moat: 3,
+              total: 16,
+            },
+            {
+              id: 17,
+              idea: "Niche Social Network",
+              group: "Lifestyle",
+              problem: 3,
+              market: 2,
+              cost: 5,
+              scale: 3,
+              moat: 3,
+              total: 16,
+            },
+            {
+              id: 9,
+              idea: "Subscription Box Platform",
+              group:
+                "Retail/E-commerce",
+              problem: 3,
+              market: 3,
+              cost: 4,
+              scale: 3,
+              moat: 2,
+              total: 15,
+            },
+            {
+              id: 18,
+              idea: "AI Personal Event Planner",
+              group: "Lifestyle",
+              problem: 3,
+              market: 3,
+              cost: 4,
+              scale: 3,
+              moat: 2,
+              total: 15,
+            },
+          ];
 
-        const watchlistData = [
-            { id: 1, idea: "SME Financial Cockpit", group: "FinTech", problem: 5, market: 4, cost: 4, scale: 5, moat: 4, total: 22 },
-            { id: 13, idea: "Moo Baan OS", group: "PropTech", problem: 5, market: 4, cost: 4, scale: 4, moat: 5, total: 22 },
-            { id: 10, idea: "Farm-to-Restaurant Marketplace", group: "AgriTech", problem: 5, market: 5, cost: 3, scale: 4, moat: 4, total: 21 },
-            { id: 14, idea: "Rental Lifecycle Management", group: "PropTech", problem: 4, market: 4, cost: 4, scale: 5, moat: 4, total: 21 },
-            { id: 4, idea: "B2B Marketplace for OTOP", group: "SME/Enterprise", problem: 4, market: 5, cost: 4, scale: 4, moat: 3, total: 20 },
-            { id: 6, idea: "AI Logistics Optimizer", group: "SME/Enterprise", problem: 4, market: 4, cost: 4, scale: 5, moat: 3, total: 20 },
-            { id: 20, idea: "EV Charging Network App", group: "Sustainability", problem: 4, market: 5, cost: 2, scale: 5, moat: 4, total: 20 },
-            { id: 2, idea: "AI Insurance Aggregator", group: "FinTech", problem: 4, market: 4, cost: 4, scale: 4, moat: 3, total: 19 },
-            { id: 5, idea: "Vertical SaaS for Spas", group: "SME/Enterprise", problem: 4, market: 3, cost: 4, scale: 4, moat: 4, total: 19 },
-            { id: 11, idea: "IoT Water Management", group: "AgriTech", problem: 5, market: 4, cost: 2, scale: 4, moat: 4, total: 19 },
-            { id: 12, idea: "Crop-Disease Diagnosis App", group: "AgriTech", problem: 5, market: 4, cost: 3, scale: 4, moat: 3, total: 19 },
-            { id: 16, idea: "Hyperlocal Skills Exchange", group: "Lifestyle", problem: 4, market: 3, cost: 5, scale: 3, moat: 3, total: 18 },
-            { id: 19, idea: "Waste Management Marketplace", group: "Sustainability", problem: 4, market: 4, cost: 3, scale: 4, moat: 3, total: 18 },
-            { id: 3, idea: "AI Robo-Advisor", group: "FinTech", problem: 3, market: 4, cost: 3, scale: 5, moat: 2, total: 17 },
-            { id: 7, idea: "Hyperlocal Group Buy", group: "Retail/E-commerce", problem: 3, market: 4, cost: 4, scale: 4, moat: 2, total: 17 },
-            { id: 15, idea: "Fractional Vacation Homes", group: "PropTech", problem: 3, market: 3, cost: 2, scale: 4, moat: 4, total: 16 },
-            { id: 8, idea: "AR Virtual Try-On", group: "Retail/E-commerce", problem: 3, market: 3, cost: 3, scale: 4, moat: 3, total: 16 },
-            { id: 17, idea: "Niche Social Network", group: "Lifestyle", problem: 3, market: 2, cost: 5, scale: 3, moat: 3, total: 16 },
-            { id: 9, idea: "Subscription Box Platform", group: "Retail/E-commerce", problem: 3, market: 3, cost: 4, scale: 3, moat: 2, total: 15 },
-            { id: 18, idea: "AI Personal Event Planner", group: "Lifestyle", problem: 3, market: 3, cost: 4, scale: 3, moat: 2, total: 15 },
-        ];
-        
-        const fullWatchlistData = [
-            ...watchlistData
-        ].map(item => {
+          const fullWatchlistData = [
+            ...watchlistData,
+          ].map((item) => {
             const details = {
-                1: { problem_desc: "SME ไทยใช้เครื่องมือที่กระจัดกระจาย (เช่น Excel) ในการจัดการการเงิน ทำให้ขาดมุมมองแบบเรียลไทม์และครบวงจรเกี่ยวกับสถานะทางการเงินของตนเอง", solution: "แพลตฟอร์ม SaaS ที่เชื่อมต่อกับบัญชีธนาคารและซอฟต์แวร์บัญชี เพื่อให้มีแดชบอร์ดเดียวที่แสดงการพยากรณ์กระแสเงินสดและข้อมูลเชิงลึกที่ขับเคลื่อนด้วย AI", insight: "ได้รับแรงบันดาลใจจาก The Groove แต่สร้างขึ้นมาเพื่อให้ใช้งานง่ายและมีราคาที่เหมาะสมสำหรับ SME", monetization: "สมัครสมาชิก SaaS แบบแบ่งระดับ" },
-                13: { problem_desc: "การใช้ชีวิตในหมู่บ้านจัดสรรของไทยถูกจัดการผ่านการผสมผสานที่ยุ่งเหยิงของกลุ่ม LINE, ป้ายประกาศ และการโทรศัพท์ ทำให้ไม่มีประสิทธิภาพและขาดความเป็นระบบ", solution: "แพลตฟอร์ม SaaS แบบ B2B2C ที่ขายให้กับนิติบุคคล โดยมีแอปเดียวสำหรับผู้อยู่อาศัยเพื่อจ่ายบิล, จองสิ่งอำนวยความสะดวก, รับประกาศ และจัดการผู้มาติดต่อ", insight: "เป็นการเล่นในตลาดท้องถิ่น (Hyperlocal) ในสภาพแวดล้อมที่ปิด ซึ่งซอฟต์แวร์ทั่วไปไม่สามารถตอบโจทย์ด้านการใช้ชีวิตในชุมชนได้", monetization: "ค่าธรรมเนียม SaaS รายเดือนที่เรียกเก็บจากนิติบุคคล และรายได้จากการเป็นพันธมิตรทางการค้าในระดับท้องถิ่น" },
-                10: { problem_desc: "ร้านอาหารต้องการวัตถุดิบที่สดใหม่และมีคุณภาพสูง และเกษตรกรต้องการราคาที่ยุติธรรม แต่ห่วงโซ่อุปทานถูกครอบงำโดยพ่อค้าคนกลางที่ไม่มีประสิทธิภาพ", solution: "ตลาด B2B ที่เชื่อมต่อเกษตรกรโดยตรงกับร้านอาหาร, โรงแรม และคาเฟ่ เพื่อให้สามารถสั่งซื้อผลผลิตสดใหม่พร้อมข้อมูลราคาและแหล่งที่มาที่โปร่งใส", insight: "คล้ายกับ 'Frubana' ในละตินอเมริกา และสอดคล้องกับนโยบาย AgriTech ของรัฐบาลไทย", monetization: "ค่าคอมมิชชันจากการทำธุรกรรม" },
-                14: { problem_desc: "สำหรับเจ้าของบ้านเช่ารายบุคคล การจัดการทรัพย์สินให้เช่าเป็นเรื่องยุ่งยาก ตั้งแต่การหาผู้เช่า, การเก็บค่าเช่า, การจัดการการบำรุงรักษา ไปจนถึงการจัดการสัญญา", solution: "แพลตฟอร์มครบวงจรสำหรับเจ้าของบ้านเช่าที่ทำให้การคัดกรองผู้เช่า, สัญญาดิจิทัล, การเก็บค่าเช่า และการแจ้งซ่อมเป็นไปโดยอัตโนมัติ", insight: "ได้รับแรงบันดาลใจจาก SpeedHome ในมาเลเซีย แต่เป็นเครื่องมือการจัดการที่ครอบคลุมกว่า", monetization: "โมเดล Freemium พร้อมฟีเจอร์พรีเมียม, ค่าธรรมเนียมการทำธุรกรรม และค่าคอมมิชชันจากผลิตภัณฑ์ประกันภัย" },
-                4: { problem_desc: "ผู้ผลิตสินค้าท้องถิ่น (OTOP) และช่างฝีมือไทยขาดช่องทางดิจิทัลในการเข้าถึงผู้ซื้อ B2B ทั่วโลก แพลตฟอร์มที่มีอยู่ไม่ได้ผ่านการคัดสรรและใช้งานยาก", solution: "ตลาด B2B ที่เน้นการคัดสรรและนำเสนอด้วยภาพที่สวยงาม เหมือน 'Faire.com สำหรับงานฝีมือไทย' โดยแพลตฟอร์มจะจัดการด้านโลจิสติกส์, การชำระเงิน และการตรวจสอบคุณภาพ", insight: "คุณค่าอยู่ที่การคัดสรรและความไว้วางใจ ไม่ใช่แค่การเป็นไดเรกทอรี", monetization: "ค่าคอมมิชชันจากการทำธุรกรรม บวกกับบริการพรีเมียมสำหรับซัพพลายเออร์" },
-                6: { problem_desc: "ผู้ขายอีคอมเมิร์ซบนหลายแพลตฟอร์ม (Lazada, Shopee) ประสบปัญหาในการจัดการสินค้าคงคลังและเลือกตัวเลือกการจัดส่งที่คุ้มค่าที่สุด", solution: "เครื่องมือ SaaS ที่เชื่อมต่อกับตลาดและผู้ให้บริการโลจิสติกส์ ใช้ AI เพื่อแนะนำระดับสินค้าคงคลังที่เหมาะสมและผู้ให้บริการจัดส่งที่ถูกที่สุด/เร็วที่สุดแบบเรียลไทม์", insight: "เป็นการลงทุนใน 'พลั่วและจอบ' ท่ามกลางยุคตื่นทองของอีคอมเมิร์ซ", monetization: "ค่าสมัครสมาชิก SaaS ตามปริมาณคำสั่งซื้อ" },
-                20: { problem_desc: "ผู้ขับขี่รถยนต์ไฟฟ้า (EV) ในไทยต้องเผชิญกับ 'ความกังวลเรื่องระยะทาง' และปัญหาในการหาสถานีชาร์จที่ว่างและใช้งานได้", solution: "แอปที่รวบรวมสถานีชาร์จทั้งหมดไว้บนแผนที่เดียว, แสดงสถานะความพร้อมใช้งานแบบเรียลไทม์, และอนุญาตให้จองและชำระเงินได้", insight: "คล้ายกับ 'ChargePoint' หรือ 'PlugShare' ในสหรัฐอเมริกา เป็นแอปที่เปิดใช้งานโครงสร้างพื้นฐานที่สำคัญ", monetization: "ค่าธรรมเนียมการทำธุรกรรมในการชาร์จ และค่าธรรมเนียม SaaS สำหรับธุรกิจที่จัดการเครื่องชาร์จของตน" },
-                2: { problem_desc: "การซื้อประกันในประเทศไทยเป็นกระบวนการที่ซับซ้อน, ไม่โปร่งใส และขับเคลื่อนโดยตัวแทน การจัดการกรมธรรม์หลายฉบับเป็นเรื่องยุ่งยาก", solution: "แพลตฟอร์มที่ให้คำแนะนำที่เป็นกลางและขับเคลื่อนด้วย AI สำหรับกรมธรรม์ประกันภัย และแปลงกรมธรรม์ที่มีอยู่ทั้งหมดให้อยู่ในรูปแบบดิจิทัลและจัดการได้ในที่เดียว", insight: "คล้ายกับ Policybazaar ในอินเดีย แต่มีชั้นของการให้คำปรึกษาด้วย AI และการจัดการหลังการซื้อที่แข็งแกร่งกว่า", monetization: "ค่าคอมมิชชันจากบริษัทประกันสำหรับกรมธรรม์ที่ขายได้" },
-                5: { problem_desc: "อุตสาหกรรมสปาและสุขภาพที่แพร่หลายในประเทศไทยมักใช้ระบบที่ใช้กระดาษหรือซอฟต์แวร์การจองทั่วไป ซึ่งขาดเครื่องมือที่ตอบโจทย์เฉพาะทาง", solution: "แพลตฟอร์ม SaaS แบบครบวงจรที่เน้นการใช้งานบนมือถือซึ่งปรับให้เหมาะกับสปา, ร้านนวด และคลินิกความงามโดยเฉพาะ", insight: "Vertical SaaS เป็นโมเดลที่ได้รับการพิสูจน์แล้วทั่วโลก การมุ่งเน้นไปที่อุตสาหกรรมเดียวจะทำให้สามารถสร้างผลิตภัณฑ์ที่มีประสิทธิภาพมากกว่าโซลูชันทั่วไปได้", monetization: "ค่าสมัครสมาชิก SaaS รายเดือนตามจำนวนพนักงานหรือสาขา" },
-                11: { problem_desc: "เกษตรกรรายย่อยประสบปัญหาการใช้น้ำและปุ๋ยอย่างไม่มีประสิทธิภาพ ซึ่งเพิ่มต้นทุนและลดผลผลิต", solution: "บริการสมัครสมาชิกราคาประหยัดที่ให้เซ็นเซอร์ IoT และแอปบนมือถือที่เรียบง่ายซึ่งให้คำแนะนำที่ชัดเจนเกี่ยวกับเวลาและปริมาณที่ควรให้น้ำและปุ๋ย", insight: "ทำให้ Smart Farming เข้าถึงได้ผ่านโมเดล 'as-a-service' ต้นทุนต่ำ ซึ่งสอดคล้องกับนโยบายรัฐบาล", monetization: "ค่าสมัครสมาชิกรายเดือนต่อไร่/เฮกตาร์" },
-                12: { problem_desc: "เกษตรกรมักไม่สามารถระบุโรคพืชได้ตั้งแต่เนิ่นๆ ทำให้เกิดความสูญเสียอย่างมาก และการเข้าถึงผู้เชี่ยวชาญก็มีจำกัด", solution: "แอปบนมือถือที่เกษตรกรสามารถถ่ายรูปพืชที่เป็นโรค แล้วโมเดล AI จะระบุโรคและแนะนำทางเลือกในการรักษา", insight: "คล้ายกับ 'Plantix' (เยอรมนี/อินเดีย) ซึ่งใช้ประโยชน์จากการเข้าถึงมือถือที่สูงในพื้นที่ชนบทเพื่อส่งมอบข้อมูลที่สำคัญ", monetization: "โมเดล Freemium พร้อมฟีเจอร์พรีเมียม (การปรึกษาผู้เชี่ยวชาญ)" },
-                16: { problem_desc: "ผู้คนต้องการความช่วยเหลือสำหรับงานเล็กๆ น้อยๆ ในชีวิตประจำวัน แต่ไม่รู้ว่าจะไว้ใจใครในละแวกบ้าน", solution: "ตลาดชุมชนท้องถิ่นที่น่าเชื่อถือ (เหมือน 'TaskRabbit' เวอร์ชันท้องถิ่น) ที่เพื่อนบ้านสามารถเสนอบริการและจ้างงานเล็กๆ น้อยๆ จากกันและกันได้", insight: "สอดคล้องกับเทรนด์ชุมชนท้องถิ่น (Hyperlocal) และความต้องการปฏิสัมพันธ์แบบ Peer-to-Peer ที่น่าเชื่อถือ", monetization: "ค่าธรรมเนียมแพลตฟอร์มสำหรับแต่ละงานที่เสร็จสมบูรณ์" },
-                19: { problem_desc: "ธุรกิจต่างๆ (ร้านอาหาร, โรงแรม) สร้างขยะรีไซเคิลจำนวนมาก แต่ขาดวิธีที่มีประสิทธิภาพและโปร่งใสในการขายให้กับบริษัทรีไซเคิล", solution: "ตลาด B2B ที่เชื่อมต่อธุรกิจที่มีขยะกับบริษัทรีไซเคิลที่ได้รับการรับรอง ธุรกิจสามารถกำหนดเวลารับและรับการเสนอราคาที่แข่งขันได้", insight: "สอดคล้องกับโมเดลเศรษฐกิจ BCG ของรัฐบาล เป็นการนำเทคโนโลยีมาเพิ่มประสิทธิภาพในอุตสาหกรรมดั้งเดิม", monetization: "ค่าคอมมิชชันจากมูลค่าของวัสดุที่ขายได้" },
-                3: { problem_desc: "คนไทยรุ่นใหม่จำนวนมากต้องการลงทุน แต่รู้สึกกลัวความซับซ้อนและค่าธรรมเนียมที่สูงของการจัดการความมั่งคั่งแบบดั้งเดิม", solution: "Robo-advisor ที่เน้นการใช้งานบนมือถือเป็นหลัก ซึ่งใช้ AI ในการสร้างและจัดการพอร์ตการลงทุนที่ปรับให้เหมาะกับแต่ละบุคคลอย่างยิ่ง", insight: "นำโมเดลของ Betterment (สหรัฐอเมริกา) มาปรับใช้กับตลาดไทย โดยเน้นการลงทุนในประเทศและใช้ประโยชน์จากนโยบายส่งเสริมความรู้ทางการเงิน", monetization: "ค่าธรรมเนียมการจัดการตามสัดส่วนเล็กน้อยของสินทรัพย์ภายใต้การจัดการ (AUM)" },
-                7: { problem_desc: "ผู้บริโภคต้องการราคาที่ดีกว่า และธุรกิจในท้องถิ่นต้องการลูกค้ามากขึ้น แต่โมเดลการซื้อแบบกลุ่มที่มีอยู่มักจะเน้นที่แพลตฟอร์มเป็นศูนย์กลาง", solution: "แอปบนมือถือที่ให้อำนาจแก่ผู้นำชุมชนในการริเริ่มและจัดการการซื้อแบบกลุ่มสำหรับชุมชนท้องถิ่นของตน", insight: "ได้รับแรงบันดาลใจจาก Pinduoduo ของจีน แต่ในระดับท้องถิ่นและขับเคลื่อนโดยชุมชน ซึ่งสอดคล้องกับวัฒนธรรมไทย", monetization: "ค่าคอมมิชชันเล็กน้อยจากการซื้อแบบกลุ่มที่ประสบความสำเร็จแต่ละครั้ง" },
-                15: { problem_desc: "คนไทยจำนวนมากใฝ่ฝันที่จะเป็นเจ้าของบ้านพักตากอากาศในสถานที่ท่องเที่ยวยอดนิยม แต่ถูกจำกัดด้วยราคาตลาดที่สูง", solution: "แพลตฟอร์มที่จัดโครงสร้างทางกฎหมายและขายกรรมสิทธิ์ร่วม (Fractional Ownership) ในอสังหาริมทรัพย์เพื่อการพักผ่อนสุดหรู โดยแพลตฟอร์มจะจัดการทรัพย์สินและการจองให้", insight: "คล้ายกับ 'Pacaso' ในสหรัฐอเมริกา ซึ่งทำให้สินทรัพย์หรูหราสามารถเข้าถึงได้โดยกลุ่มเป้าหมายที่กว้างขึ้น", monetization: "ค่าบริการจากการขายเริ่มต้นและค่าธรรมเนียมการจัดการทรัพย์สินอย่างต่อเนื่อง" },
-                8: { problem_desc: "อุปสรรคที่ใหญ่ที่สุดในการซื้อเสื้อผ้าออนไลน์คือการไม่สามารถลองได้ ซึ่งนำไปสู่อัตราการคืนสินค้าที่สูง", solution: "บริการ B2B (SDK/API) ที่แบรนด์แฟชั่นสามารถรวมเข้ากับเว็บไซต์/แอปของตนได้อย่างง่ายดาย เพื่อให้ลูกค้าสามารถใช้ AR ลองเสื้อผ้าผ่านกล้องโทรศัพท์ได้", insight: "ทำให้เทคโนโลยี Virtual Try-On ที่ได้รับการพิสูจน์แล้ว (เช่น โดย Wannaby) เข้าถึงได้ง่ายและมีราคาไม่แพงสำหรับตลาดไทย", monetization: "ค่าธรรมเนียม SaaS แบบ B2B" },
-                17: { problem_desc: "โซเชียลมีเดียกระแสหลักกว้างเกินไปสำหรับผู้ที่มีงานอดิเรกเฉพาะทาง (เช่น นักสะสมต้นไม้, นักสร้างโมเดล) ซึ่งขาดพื้นที่ดิจิทัลโดยเฉพาะ", solution: "แพลตฟอร์มที่มีฟีเจอร์ที่ปรับให้เหมาะกับชุมชนคนรักงานอดิเรกเฉพาะกลุ่ม รวมถึงเครื่องมือจัดการคอลเลกชัน, ตลาดเฉพาะทาง และฟอรัม", insight: "เครือข่ายสังคมแนวดิ่งเป็นโมเดลที่ได้รับการพิสูจน์แล้ว กุญแจสำคัญคือการเลือกตลาดเฉพาะกลุ่มที่มีความหลงใหลและมีมูลค่าสูงในประเทศไทย", monetization: "ค่าธรรมเนียมการทำธุรกรรมในตลาด, ฟีเจอร์พรีเมียมสำหรับผู้ขาย" },
-                9: { problem_desc: "ผู้บริโภคชอบค้นพบผลิตภัณฑ์ใหม่ๆ และผู้ผลิตรายย่อยต้องการช่องทางใหม่ในการเข้าถึงลูกค้า", solution: "แพลตฟอร์มที่ช่วยให้ครีเอเตอร์และอินฟลูเอนเซอร์สามารถคัดสรรกล่องสมัครสมาชิกตามธีมของตนเอง โดยแพลตฟอร์มจะจัดการด้านโลจิสติกส์และการชำระเงินให้", insight: "เป็น 'Cratejoy สำหรับประเทศไทย' แต่เน้นการให้อำนาจแก่อินฟลูเอนเซอร์ในท้องถิ่นในฐานะผู้คัดสรร", monetization: "ค่าธรรมเนียมแพลตฟอร์ม (เปอร์เซ็นต์ของรายได้จากการสมัครสมาชิก)" },
-                18: { problem_desc: "การวางแผนทริปหรืองานอีเวนต์ส่วนตัวต้องมีการประสานงานและค้นคว้าข้อมูลมากมายและใช้เวลานาน", solution: "นักวางแผนที่ขับเคลื่อนด้วย AI ที่ผู้ใช้สามารถป้อนคำสั่งง่ายๆ (เช่น 'วางแผนทริป 3 วันที่เขาใหญ่ งบ 15,000 บาท') และ AI จะสร้างแผนการเดินทางที่สมบูรณ์และสามารถจองได้", insight: "ใช้ประโยชน์จากความก้าวหน้าของ LLM เพื่อแก้ปัญหาที่ซับซ้อนของผู้บริโภค ก้าวไปไกลกว่าการค้นหาธรรมดาไปสู่การวางแผนจริง", monetization: "ค่าคอมมิชชันจากพันธมิตรจากการจอง" }
+              1: {
+                problem_desc:
+                  "SME ไทยใช้เครื่องมือที่กระจัดกระจาย (เช่น Excel) ในการจัดการการเงิน ทำให้ขาดมุมมองแบบเรียลไทม์และครบวงจรเกี่ยวกับสถานะทางการเงินของตนเอง",
+                solution:
+                  "แพลตฟอร์ม SaaS ที่เชื่อมต่อกับบัญชีธนาคารและซอฟต์แวร์บัญชี เพื่อให้มีแดชบอร์ดเดียวที่แสดงการพยากรณ์กระแสเงินสดและข้อมูลเชิงลึกที่ขับเคลื่อนด้วย AI",
+                insight:
+                  "ได้รับแรงบันดาลใจจาก The Groove แต่สร้างขึ้นมาเพื่อให้ใช้งานง่ายและมีราคาที่เหมาะสมสำหรับ SME",
+                monetization:
+                  "สมัครสมาชิก SaaS แบบแบ่งระดับ",
+              },
+              13: {
+                problem_desc:
+                  "การใช้ชีวิตในหมู่บ้านจัดสรรของไทยถูกจัดการผ่านการผสมผสานที่ยุ่งเหยิงของกลุ่ม LINE, ป้ายประกาศ และการโทรศัพท์ ทำให้ไม่มีประสิทธิภาพและขาดความเป็นระบบ",
+                solution:
+                  "แพลตฟอร์ม SaaS แบบ B2B2C ที่ขายให้กับนิติบุคคล โดยมีแอปเดียวสำหรับผู้อยู่อาศัยเพื่อจ่ายบิล, จองสิ่งอำนวยความสะดวก, รับประกาศ และจัดการผู้มาติดต่อ",
+                insight:
+                  "เป็นการเล่นในตลาดท้องถิ่น (Hyperlocal) ในสภาพแวดล้อมที่ปิด ซึ่งซอฟต์แวร์ทั่วไปไม่สามารถตอบโจทย์ด้านการใช้ชีวิตในชุมชนได้",
+                monetization:
+                  "ค่าธรรมเนียม SaaS รายเดือนที่เรียกเก็บจากนิติบุคคล และรายได้จากการเป็นพันธมิตรทางการค้าในระดับท้องถิ่น",
+              },
+              10: {
+                problem_desc:
+                  "ร้านอาหารต้องการวัตถุดิบที่สดใหม่และมีคุณภาพสูง และเกษตรกรต้องการราคาที่ยุติธรรม แต่ห่วงโซ่อุปทานถูกครอบงำโดยพ่อค้าคนกลางที่ไม่มีประสิทธิภาพ",
+                solution:
+                  "ตลาด B2B ที่เชื่อมต่อเกษตรกรโดยตรงกับร้านอาหาร, โรงแรม และคาเฟ่ เพื่อให้สามารถสั่งซื้อผลผลิตสดใหม่พร้อมข้อมูลราคาและแหล่งที่มาที่โปร่งใส",
+                insight:
+                  "คล้ายกับ 'Frubana' ในละตินอเมริกา และสอดคล้องกับนโยบาย AgriTech ของรัฐบาลไทย",
+                monetization:
+                  "ค่าคอมมิชชันจากการทำธุรกรรม",
+              },
+              14: {
+                problem_desc:
+                  "สำหรับเจ้าของบ้านเช่ารายบุคคล การจัดการทรัพย์สินให้เช่าเป็นเรื่องยุ่งยาก ตั้งแต่การหาผู้เช่า, การเก็บค่าเช่า, การจัดการการบำรุงรักษา ไปจนถึงการจัดการสัญญา",
+                solution:
+                  "แพลตฟอร์มครบวงจรสำหรับเจ้าของบ้านเช่าที่ทำให้การคัดกรองผู้เช่า, สัญญาดิจิทัล, การเก็บค่าเช่า และการแจ้งซ่อมเป็นไปโดยอัตโนมัติ",
+                insight:
+                  "ได้รับแรงบันดาลใจจาก SpeedHome ในมาเลเซีย แต่เป็นเครื่องมือการจัดการที่ครอบคลุมกว่า",
+                monetization:
+                  "โมเดล Freemium พร้อมฟีเจอร์พรีเมียม, ค่าธรรมเนียมการทำธุรกรรม และค่าคอมมิชชันจากผลิตภัณฑ์ประกันภัย",
+              },
+              4: {
+                problem_desc:
+                  "ผู้ผลิตสินค้าท้องถิ่น (OTOP) และช่างฝีมือไทยขาดช่องทางดิจิทัลในการเข้าถึงผู้ซื้อ B2B ทั่วโลก แพลตฟอร์มที่มีอยู่ไม่ได้ผ่านการคัดสรรและใช้งานยาก",
+                solution:
+                  "ตลาด B2B ที่เน้นการคัดสรรและนำเสนอด้วยภาพที่สวยงาม เหมือน 'Faire.com สำหรับงานฝีมือไทย' โดยแพลตฟอร์มจะจัดการด้านโลจิสติกส์, การชำระเงิน และการตรวจสอบคุณภาพ",
+                insight:
+                  "คุณค่าอยู่ที่การคัดสรรและความไว้วางใจ ไม่ใช่แค่การเป็นไดเรกทอรี",
+                monetization:
+                  "ค่าคอมมิชชันจากการทำธุรกรรม บวกกับบริการพรีเมียมสำหรับซัพพลายเออร์",
+              },
+              6: {
+                problem_desc:
+                  "ผู้ขายอีคอมเมิร์ซบนหลายแพลตฟอร์ม (Lazada, Shopee) ประสบปัญหาในการจัดการสินค้าคงคลังและเลือกตัวเลือกการจัดส่งที่คุ้มค่าที่สุด",
+                solution:
+                  "เครื่องมือ SaaS ที่เชื่อมต่อกับตลาดและผู้ให้บริการโลจิสติกส์ ใช้ AI เพื่อแนะนำระดับสินค้าคงคลังที่เหมาะสมและผู้ให้บริการจัดส่งที่ถูกที่สุด/เร็วที่สุดแบบเรียลไทม์",
+                insight:
+                  "เป็นการลงทุนใน 'พลั่วและจอบ' ท่ามกลางยุคตื่นทองของอีคอมเมิร์ซ",
+                monetization:
+                  "ค่าสมัครสมาชิก SaaS ตามปริมาณคำสั่งซื้อ",
+              },
+              20: {
+                problem_desc:
+                  "ผู้ขับขี่รถยนต์ไฟฟ้า (EV) ในไทยต้องเผชิญกับ 'ความกังวลเรื่องระยะทาง' และปัญหาในการหาสถานีชาร์จที่ว่างและใช้งานได้",
+                solution:
+                  "แอปที่รวบรวมสถานีชาร์จทั้งหมดไว้บนแผนที่เดียว, แสดงสถานะความพร้อมใช้งานแบบเรียลไทม์, และอนุญาตให้จองและชำระเงินได้",
+                insight:
+                  "คล้ายกับ 'ChargePoint' หรือ 'PlugShare' ในสหรัฐอเมริกา เป็นแอปที่เปิดใช้งานโครงสร้างพื้นฐานที่สำคัญ",
+                monetization:
+                  "ค่าธรรมเนียมการทำธุรกรรมในการชาร์จ และค่าธรรมเนียม SaaS สำหรับธุรกิจที่จัดการเครื่องชาร์จของตน",
+              },
+              2: {
+                problem_desc:
+                  "การซื้อประกันในประเทศไทยเป็นกระบวนการที่ซับซ้อน, ไม่โปร่งใส และขับเคลื่อนโดยตัวแทน การจัดการกรมธรรม์หลายฉบับเป็นเรื่องยุ่งยาก",
+                solution:
+                  "แพลตฟอร์มที่ให้คำแนะนำที่เป็นกลางและขับเคลื่อนด้วย AI สำหรับกรมธรรม์ประกันภัย และแปลงกรมธรรม์ที่มีอยู่ทั้งหมดให้อยู่ในรูปแบบดิจิทัลและจัดการได้ในที่เดียว",
+                insight:
+                  "คล้ายกับ Policybazaar ในอินเดีย แต่มีชั้นของการให้คำปรึกษาด้วย AI และการจัดการหลังการซื้อที่แข็งแกร่งกว่า",
+                monetization:
+                  "ค่าคอมมิชชันจากบริษัทประกันสำหรับกรมธรรม์ที่ขายได้",
+              },
+              5: {
+                problem_desc:
+                  "อุตสาหกรรมสปาและสุขภาพที่แพร่หลายในประเทศไทยมักใช้ระบบที่ใช้กระดาษหรือซอฟต์แวร์การจองทั่วไป ซึ่งขาดเครื่องมือที่ตอบโจทย์เฉพาะทาง",
+                solution:
+                  "แพลตฟอร์ม SaaS แบบครบวงจรที่เน้นการใช้งานบนมือถือซึ่งปรับให้เหมาะกับสปา, ร้านนวด และคลินิกความงามโดยเฉพาะ",
+                insight:
+                  "Vertical SaaS เป็นโมเดลที่ได้รับการพิสูจน์แล้วทั่วโลก การมุ่งเน้นไปที่อุตสาหกรรมเดียวจะทำให้สามารถสร้างผลิตภัณฑ์ที่มีประสิทธิภาพมากกว่าโซลูชันทั่วไปได้",
+                monetization:
+                  "ค่าสมัครสมาชิก SaaS รายเดือนตามจำนวนพนักงานหรือสาขา",
+              },
+              11: {
+                problem_desc:
+                  "เกษตรกรรายย่อยประสบปัญหาการใช้น้ำและปุ๋ยอย่างไม่มีประสิทธิภาพ ซึ่งเพิ่มต้นทุนและลดผลผลิต",
+                solution:
+                  "บริการสมัครสมาชิกราคาประหยัดที่ให้เซ็นเซอร์ IoT และแอปบนมือถือที่เรียบง่ายซึ่งให้คำแนะนำที่ชัดเจนเกี่ยวกับเวลาและปริมาณที่ควรให้น้ำและปุ๋ย",
+                insight:
+                  "ทำให้ Smart Farming เข้าถึงได้ผ่านโมเดล 'as-a-service' ต้นทุนต่ำ ซึ่งสอดคล้องกับนโยบายรัฐบาล",
+                monetization:
+                  "ค่าสมัครสมาชิกรายเดือนต่อไร่/เฮกตาร์",
+              },
+              12: {
+                problem_desc:
+                  "เกษตรกรมักไม่สามารถระบุโรคพืชได้ตั้งแต่เนิ่นๆ ทำให้เกิดความสูญเสียอย่างมาก และการเข้าถึงผู้เชี่ยวชาญก็มีจำกัด",
+                solution:
+                  "แอปบนมือถือที่เกษตรกรสามารถถ่ายรูปพืชที่เป็นโรค แล้วโมเดล AI จะระบุโรคและแนะนำทางเลือกในการรักษา",
+                insight:
+                  "คล้ายกับ 'Plantix' (เยอรมนี/อินเดีย) ซึ่งใช้ประโยชน์จากการเข้าถึงมือถือที่สูงในพื้นที่ชนบทเพื่อส่งมอบข้อมูลที่สำคัญ",
+                monetization:
+                  "โมเดล Freemium พร้อมฟีเจอร์พรีเมียม (การปรึกษาผู้เชี่ยวชาญ)",
+              },
+              16: {
+                problem_desc:
+                  "ผู้คนต้องการความช่วยเหลือสำหรับงานเล็กๆ น้อยๆ ในชีวิตประจำวัน แต่ไม่รู้ว่าจะไว้ใจใครในละแวกบ้าน",
+                solution:
+                  "ตลาดชุมชนท้องถิ่นที่น่าเชื่อถือ (เหมือน 'TaskRabbit' เวอร์ชันท้องถิ่น) ที่เพื่อนบ้านสามารถเสนอบริการและจ้างงานเล็กๆ น้อยๆ จากกันและกันได้",
+                insight:
+                  "สอดคล้องกับเทรนด์ชุมชนท้องถิ่น (Hyperlocal) และความต้องการปฏิสัมพันธ์แบบ Peer-to-Peer ที่น่าเชื่อถือ",
+                monetization:
+                  "ค่าธรรมเนียมแพลตฟอร์มสำหรับแต่ละงานที่เสร็จสมบูรณ์",
+              },
+              19: {
+                problem_desc:
+                  "ธุรกิจต่างๆ (ร้านอาหาร, โรงแรม) สร้างขยะรีไซเคิลจำนวนมาก แต่ขาดวิธีที่มีประสิทธิภาพและโปร่งใสในการขายให้กับบริษัทรีไซเคิล",
+                solution:
+                  "ตลาด B2B ที่เชื่อมต่อธุรกิจที่มีขยะกับบริษัทรีไซเคิลที่ได้รับการรับรอง ธุรกิจสามารถกำหนดเวลารับและรับการเสนอราคาที่แข่งขันได้",
+                insight:
+                  "สอดคล้องกับโมเดลเศรษฐกิจ BCG ของรัฐบาล เป็นการนำเทคโนโลยีมาเพิ่มประสิทธิภาพในอุตสาหกรรมดั้งเดิม",
+                monetization:
+                  "ค่าคอมมิชชันจากมูลค่าของวัสดุที่ขายได้",
+              },
+              3: {
+                problem_desc:
+                  "คนไทยรุ่นใหม่จำนวนมากต้องการลงทุน แต่รู้สึกกลัวความซับซ้อนและค่าธรรมเนียมที่สูงของการจัดการความมั่งคั่งแบบดั้งเดิม",
+                solution:
+                  "Robo-advisor ที่เน้นการใช้งานบนมือถือเป็นหลัก ซึ่งใช้ AI ในการสร้างและจัดการพอร์ตการลงทุนที่ปรับให้เหมาะกับแต่ละบุคคลอย่างยิ่ง",
+                insight:
+                  "นำโมเดลของ Betterment (สหรัฐอเมริกา) มาปรับใช้กับตลาดไทย โดยเน้นการลงทุนในประเทศและใช้ประโยชน์จากนโยบายส่งเสริมความรู้ทางการเงิน",
+                monetization:
+                  "ค่าธรรมเนียมการจัดการตามสัดส่วนเล็กน้อยของสินทรัพย์ภายใต้การจัดการ (AUM)",
+              },
+              7: {
+                problem_desc:
+                  "ผู้บริโภคต้องการราคาที่ดีกว่า และธุรกิจในท้องถิ่นต้องการลูกค้ามากขึ้น แต่โมเดลการซื้อแบบกลุ่มที่มีอยู่มักจะเน้นที่แพลตฟอร์มเป็นศูนย์กลาง",
+                solution:
+                  "แอปบนมือถือที่ให้อำนาจแก่ผู้นำชุมชนในการริเริ่มและจัดการการซื้อแบบกลุ่มสำหรับชุมชนท้องถิ่นของตน",
+                insight:
+                  "ได้รับแรงบันดาลใจจาก Pinduoduo ของจีน แต่ในระดับท้องถิ่นและขับเคลื่อนโดยชุมชน ซึ่งสอดคล้องกับวัฒนธรรมไทย",
+                monetization:
+                  "ค่าคอมมิชชันเล็กน้อยจากการซื้อแบบกลุ่มที่ประสบความสำเร็จแต่ละครั้ง",
+              },
+              15: {
+                problem_desc:
+                  "คนไทยจำนวนมากใฝ่ฝันที่จะเป็นเจ้าของบ้านพักตากอากาศในสถานที่ท่องเที่ยวยอดนิยม แต่ถูกจำกัดด้วยราคาตลาดที่สูง",
+                solution:
+                  "แพลตฟอร์มที่จัดโครงสร้างทางกฎหมายและขายกรรมสิทธิ์ร่วม (Fractional Ownership) ในอสังหาริมทรัพย์เพื่อการพักผ่อนสุดหรู โดยแพลตฟอร์มจะจัดการทรัพย์สินและการจองให้",
+                insight:
+                  "คล้ายกับ 'Pacaso' ในสหรัฐอเมริกา ซึ่งทำให้สินทรัพย์หรูหราสามารถเข้าถึงได้โดยกลุ่มเป้าหมายที่กว้างขึ้น",
+                monetization:
+                  "ค่าบริการจากการขายเริ่มต้นและค่าธรรมเนียมการจัดการทรัพย์สินอย่างต่อเนื่อง",
+              },
+              8: {
+                problem_desc:
+                  "อุปสรรคที่ใหญ่ที่สุดในการซื้อเสื้อผ้าออนไลน์คือการไม่สามารถลองได้ ซึ่งนำไปสู่อัตราการคืนสินค้าที่สูง",
+                solution:
+                  "บริการ B2B (SDK/API) ที่แบรนด์แฟชั่นสามารถรวมเข้ากับเว็บไซต์/แอปของตนได้อย่างง่ายดาย เพื่อให้ลูกค้าสามารถใช้ AR ลองเสื้อผ้าผ่านกล้องโทรศัพท์ได้",
+                insight:
+                  "ทำให้เทคโนโลยี Virtual Try-On ที่ได้รับการพิสูจน์แล้ว (เช่น โดย Wannaby) เข้าถึงได้ง่ายและมีราคาไม่แพงสำหรับตลาดไทย",
+                monetization:
+                  "ค่าธรรมเนียม SaaS แบบ B2B",
+              },
+              17: {
+                problem_desc:
+                  "โซเชียลมีเดียกระแสหลักกว้างเกินไปสำหรับผู้ที่มีงานอดิเรกเฉพาะทาง (เช่น นักสะสมต้นไม้, นักสร้างโมเดล) ซึ่งขาดพื้นที่ดิจิทัลโดยเฉพาะ",
+                solution:
+                  "แพลตฟอร์มที่มีฟีเจอร์ที่ปรับให้เหมาะกับชุมชนคนรักงานอดิเรกเฉพาะกลุ่ม รวมถึงเครื่องมือจัดการคอลเลกชัน, ตลาดเฉพาะทาง และฟอรัม",
+                insight:
+                  "เครือข่ายสังคมแนวดิ่งเป็นโมเดลที่ได้รับการพิสูจน์แล้ว กุญแจสำคัญคือการเลือกตลาดเฉพาะกลุ่มที่มีความหลงใหลและมีมูลค่าสูงในประเทศไทย",
+                monetization:
+                  "ค่าธรรมเนียมการทำธุรกรรมในตลาด, ฟีเจอร์พรีเมียมสำหรับผู้ขาย",
+              },
+              9: {
+                problem_desc:
+                  "ผู้บริโภคชอบค้นพบผลิตภัณฑ์ใหม่ๆ และผู้ผลิตรายย่อยต้องการช่องทางใหม่ในการเข้าถึงลูกค้า",
+                solution:
+                  "แพลตฟอร์มที่ช่วยให้ครีเอเตอร์และอินฟลูเอนเซอร์สามารถคัดสรรกล่องสมัครสมาชิกตามธีมของตนเอง โดยแพลตฟอร์มจะจัดการด้านโลจิสติกส์และการชำระเงินให้",
+                insight:
+                  "เป็น 'Cratejoy สำหรับประเทศไทย' แต่เน้นการให้อำนาจแก่อินฟลูเอนเซอร์ในท้องถิ่นในฐานะผู้คัดสรร",
+                monetization:
+                  "ค่าธรรมเนียมแพลตฟอร์ม (เปอร์เซ็นต์ของรายได้จากการสมัครสมาชิก)",
+              },
+              18: {
+                problem_desc:
+                  "การวางแผนทริปหรืองานอีเวนต์ส่วนตัวต้องมีการประสานงานและค้นคว้าข้อมูลมากมายและใช้เวลานาน",
+                solution:
+                  "นักวางแผนที่ขับเคลื่อนด้วย AI ที่ผู้ใช้สามารถป้อนคำสั่งง่ายๆ (เช่น 'วางแผนทริป 3 วันที่เขาใหญ่ งบ 15,000 บาท') และ AI จะสร้างแผนการเดินทางที่สมบูรณ์และสามารถจองได้",
+                insight:
+                  "ใช้ประโยชน์จากความก้าวหน้าของ LLM เพื่อแก้ปัญหาที่ซับซ้อนของผู้บริโภค ก้าวไปไกลกว่าการค้นหาธรรมดาไปสู่การวางแผนจริง",
+                monetization:
+                  "ค่าคอมมิชชันจากพันธมิตรจากการจอง",
+              },
             };
             return {
-                ...item,
-                ...details[item.id]
+              ...item,
+              ...details[item.id],
             };
-        });
+          });
 
-        const playbookData = [
-            { title: "การสร้างทีม A-Team ของคุณ", content: "มองหาผู้ร่วมก่อตั้งที่มีวิสัยทัศน์ตรงกัน, ยอมรับความเสี่ยงได้ และมีชุดทักษะที่ส่งเสริมกัน (เช่น เทคนิค + ธุรกิจ) พนักงาน 5 คนแรกควรเป็นวิศวกรที่หลงใหลในผลิตภัณฑ์และผู้จัดการชุมชนที่เน้นลูกค้าเป็นศูนย์กลาง" },
-            { title: "เส้นทางแบบ Lean สู่ Product-Market Fit", content: "สร้าง MVP (Minimum Viable Product) ที่แก้ปัญหาที่เจ็บปวดที่สุดสำหรับผู้ใช้กลุ่มแรก ไม่ใช่แค่ผลิตภัณฑ์ที่มีฟีเจอร์น้อยที่สุด สร้างกลไกรับข้อเสนอแนะจากผู้ใช้ตั้งแต่วันแรกผ่านช่องทางที่คนไทยคุ้นเคย เช่น LINE" },
-            { title: "กลยุทธ์การระดมทุนสำหรับเวทีไทย/SEA", content: "สร้าง Pitch Deck ที่เน้นย้ำความเข้าใจในตลาด, แผนการดำเนินงาน และ 'ความได้เปรียบที่ไม่เป็นธรรม' ของคุณ VC ในภูมิภาคนี้ให้ความสำคัญกับการดำเนินงานที่พิสูจน์แล้ว, เส้นทางสร้างรายได้ที่ชัดเจน และเส้นทางสู่การขยายตัวในระดับภูมิภาค" }
-        ];
+          const playbookData = [
+            {
+              title:
+                "การสร้างทีม A-Team ของคุณ",
+              content:
+                "มองหาผู้ร่วมก่อตั้งที่มีวิสัยทัศน์ตรงกัน, ยอมรับความเสี่ยงได้ และมีชุดทักษะที่ส่งเสริมกัน (เช่น เทคนิค + ธุรกิจ) พนักงาน 5 คนแรกควรเป็นวิศวกรที่หลงใหลในผลิตภัณฑ์และผู้จัดการชุมชนที่เน้นลูกค้าเป็นศูนย์กลาง",
+            },
+            {
+              title:
+                "เส้นทางแบบ Lean สู่ Product-Market Fit",
+              content:
+                "สร้าง MVP (Minimum Viable Product) ที่แก้ปัญหาที่เจ็บปวดที่สุดสำหรับผู้ใช้กลุ่มแรก ไม่ใช่แค่ผลิตภัณฑ์ที่มีฟีเจอร์น้อยที่สุด สร้างกลไกรับข้อเสนอแนะจากผู้ใช้ตั้งแต่วันแรกผ่านช่องทางที่คนไทยคุ้นเคย เช่น LINE",
+            },
+            {
+              title:
+                "กลยุทธ์การระดมทุนสำหรับเวทีไทย/SEA",
+              content:
+                "สร้าง Pitch Deck ที่เน้นย้ำความเข้าใจในตลาด, แผนการดำเนินงาน และ 'ความได้เปรียบที่ไม่เป็นธรรม' ของคุณ VC ในภูมิภาคนี้ให้ความสำคัญกับการดำเนินงานที่พิสูจน์แล้ว, เส้นทางสร้างรายได้ที่ชัดเจน และเส้นทางสู่การขยายตัวในระดับภูมิภาค",
+            },
+          ];
 
-        let currentChart = null;
-        let currentWatchlistSort = { column: 'total', direction: 'desc' };
+          let currentChart = null;
+          let currentWatchlistSort = {
+            column: "total",
+            direction: "desc",
+          };
 
-        // --- Deep Dive Section ---
-        const ideaSelector = document.getElementById('idea-selector');
-        const ideaContent = document.getElementById('idea-content');
+          // --- Deep Dive Section ---
+          const ideaSelector =
+            document.getElementById(
+              "idea-selector"
+            );
+          const ideaContent =
+            document.getElementById(
+              "idea-content"
+            );
 
-        function createMagicQuadrantChart(canvasId, chartData) {
+          function createMagicQuadrantChart(
+            canvasId,
+            chartData
+          ) {
             if (currentChart) {
-                currentChart.destroy();
+              currentChart.destroy();
             }
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            currentChart = new Chart(ctx, {
-                type: 'scatter',
+            const ctx = document
+              .getElementById(canvasId)
+              .getContext("2d");
+            currentChart = new Chart(
+              ctx,
+              {
+                type: "scatter",
                 data: {
-                    datasets: [{
-                        label: 'Competitors',
-                        data: chartData.data,
-                        backgroundColor: (context) => context.raw.label.includes('(เป้าหมาย)') ? '#C27B7F' : '#52796F',
-                        pointRadius: 8,
-                        pointHoverRadius: 12,
-                    }]
+                  datasets: [
+                    {
+                      label:
+                        "Competitors",
+                      data: chartData.data,
+                      backgroundColor: (
+                        context
+                      ) =>
+                        context.raw.label.includes(
+                          "(เป้าหมาย)"
+                        )
+                          ? "#C27B7F"
+                          : "#52796F",
+                      pointRadius: 8,
+                      pointHoverRadius: 12,
+                    },
+                  ],
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.raw.label;
-                                }
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: chartData.title,
-                            font: { size: 16, weight: 'bold' },
-                            padding: { top: 10, bottom: 20 }
-                        }
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: false,
                     },
-                    scales: {
-                        x: {
-                            min: 0,
-                            max: 10,
-                            title: {
-                                display: true,
-                                text: chartData.xLabel,
-                                font: { size:
+                    tooltip: {
+                      callbacks: {
+                        label:
+                          function (
+                            context
+                          ) {
+                            return context
+                              .raw
+                              .label;
+                          },
+                      },
+                    },
+                    title: {
+                      display: true,
+                      text: chartData.title,
+                      font: {
+                        size: 16,
+                        weight: "bold",
+                      },
+                      padding: {
+                        top: 10,
+                        bottom: 20,
+                      },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      min: 0,
+                      max: 10,
+                      title: {
+                        display: true,
+                        text: chartData.xLabel,
+                        font: {
+                          size: 12,
+                        },
+                      },
+                    },
+                    y: {
+                      min: 0,
+                      max: 10,
+                      title: {
+                        display: true,
+                        text: chartData.yLabel,
+                        font: {
+                          size: 12,
+                        },
+                      },
+                    },
+                  },
+                },
+              }
+            );
+          }
+
+          function renderDeepDive(
+            ideaKey
+          ) {
+            const idea =
+              deepDiveData[ideaKey];
+            ideaContent.innerHTML = `
+                <div class="animate-fade-in">
+                    <h3 class="text-2xl md:text-3xl font-bold mb-4 text-slate-800">${
+                      idea.title
+                    }</h3>
+                    <p class="text-slate-600 mb-6">${
+                      idea.overview
+                    }</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3">ฟีเจอร์หลัก</h4>
+                            <ul class="space-y-3">
+                                ${idea.features
+                                  .map(
+                                    (
+                                      f
+                                    ) => `
+                                    <li class="flex items-start">
+                                        <span class="text-green-500 mr-2 mt-1">&#10003;</span>
+                                        <div><strong>${f.title}:</strong> ${f.detail}</div>
+                                    </li>
+                                `
+                                  )
+                                  .join(
+                                    ""
+                                  )}
+                            </ul>
+                        </div>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="magicQuadrantChart"></canvas>
+                        </div>
+                    </div>
+
+                    <h4 class="text-xl font-semibold mb-3">SWOT Analysis</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-green-50 border border-green-200 p-4 rounded-lg"><strong>จุดแข็ง:</strong> ${
+                          idea.swot.s
+                        }</div>
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg"><strong>จุดอ่อน:</strong> ${
+                          idea.swot.w
+                        }</div>
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg"><strong>โอกาส:</strong> ${
+                          idea.swot.o
+                        }</div>
+                        <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg"><strong>อุปสรรค:</strong> ${
+                          idea.swot.t
+                        }</div>
+                    </div>
+                    
+                    <div class="bg-slate-100 p-4 rounded-lg">
+                        <h4 class="text-xl font-semibold mb-2">คำตัดสินของผู้ก่อตั้ง</h4>
+                        <p class="text-slate-700">${
+                          idea.verdict
+                        }</p>
+                    </div>
+                </div>
+            `;
+            setTimeout(
+              () =>
+                createMagicQuadrantChart(
+                  "magicQuadrantChart",
+                  idea.magicQuadrant
+                ),
+              100
+            );
+          }
+
+          Object.keys(
+            deepDiveData
+          ).forEach((key, index) => {
+            const idea =
+              deepDiveData[key];
+            const button =
+              document.createElement(
+                "button"
+              );
+            button.className =
+              "btn-secondary py-2 px-4 rounded-full text-sm font-medium";
+            button.textContent =
+              idea.title.split(":")[0];
+            button.dataset.ideaKey =
+              key;
+            if (index === 0) {
+              button.classList.add(
+                "active"
+              );
+            }
+            ideaSelector.appendChild(
+              button
+            );
+          });
+
+          ideaSelector.addEventListener(
+            "click",
+            (e) => {
+              if (
+                e.target.tagName ===
+                "BUTTON"
+              ) {
+                const key =
+                  e.target.dataset
+                    .ideaKey;
+                renderDeepDive(key);
+                ideaSelector
+                  .querySelectorAll(
+                    "button"
+                  )
+                  .forEach((btn) =>
+                    btn.classList.remove(
+                      "active"
+                    )
+                  );
+                e.target.classList.add(
+                  "active"
+                );
+              }
+            }
+          );
+
+          renderDeepDive(
+            Object.keys(deepDiveData)[0]
+          );
+
+          // --- Watchlist Section ---
+          const watchlistTableBody =
+            document.getElementById(
+              "watchlist-table-body"
+            );
+          const watchlistFiltersContainer =
+            document.getElementById(
+              "watchlist-filters"
+            );
+          const modal =
+            document.getElementById(
+              "watchlist-modal"
+            );
+          const modalContent =
+            document.getElementById(
+              "modal-content"
+            );
+          const modalCloseBtn =
+            document.getElementById(
+              "modal-close-btn"
+            );
+
+          const renderWatchlist = (
+            data
+          ) => {
+            watchlistTableBody.innerHTML =
+              "";
+            data.forEach((item) => {
+              const row =
+                document.createElement(
+                  "tr"
+                );
+              row.className =
+                "border-b border-slate-100 hover:bg-slate-50 md:hover:bg-slate-50 cursor-pointer transition-colors";
+              row.dataset.id = item.id;
+              row.innerHTML = `
+                    <td data-label="ไอเดีย" class="p-4 font-medium text-slate-800">${item.idea}</td>
+                    <td data-label="กลุ่มธุรกิจ" class="p-4">${item.group}</td>
+                    <td data-label="คะแนนปัญหา" class="p-4 text-center">${item.problem}</td>
+                    <td data-label="ขนาดตลาด" class="p-4 text-center">${item.market}</td>
+                    <td data-label="ต้นทุนต่ำ" class="p-4 text-center">${item.cost}</td>
+                    <td data-label="ขยายตัวได้" class="p-4 text-center">${item.scale}</td>
+                    <td data-label="Moat" class="p-4 text-center">${item.moat}</td>
+                    <td data-label="คะแนนรวม" class="p-4 text-center font-bold text-lg text-emerald-600">${item.total}</td>
+                `;
+              watchlistTableBody.appendChild(
+                row
+              );
+            });
+          };
+
+          const sortWatchlist = (
+            data
+          ) => {
+            const {
+              column,
+              direction,
+            } = currentWatchlistSort;
+            const sortedData = [
+              ...data,
+            ].sort((a, b) => {
+              const valA =
+                typeof a[column] ===
+                "string"
+                  ? a[
+                      column
+                    ].toLowerCase()
+                  : a[column];
+              const valB =
+                typeof b[column] ===
+                "string"
+                  ? b[
+                      column
+                    ].toLowerCase()
+                  : b[column];
+              if (valA < valB)
+                return direction ===
+                  "asc"
+                  ? -1
+                  : 1;
+              if (valA > valB)
+                return direction ===
+                  "asc"
+                  ? 1
+                  : -1;
+              return 0;
+            });
+            renderWatchlist(sortedData);
+          };
+
+          let currentFilteredData = [
+            ...fullWatchlistData,
+          ];
+
+          document
+            .querySelectorAll(
+              ".sortable"
+            )
+            .forEach((header) => {
+              header.addEventListener(
+                "click",
+                () => {
+                  const column =
+                    header.dataset.sort;
+                  const isAsc =
+                    currentWatchlistSort.column ===
+                      column &&
+                    currentWatchlistSort.direction ===
+                      "asc";
+                  currentWatchlistSort.direction =
+                    isAsc
+                      ? "desc"
+                      : "asc";
+                  currentWatchlistSort.column =
+                    column;
+                  sortWatchlist(
+                    currentFilteredData
+                  );
+                }
+              );
+            });
+
+          const categories = [
+            "All",
+            ...new Set(
+              fullWatchlistData.map(
+                (item) => item.group
+              )
+            ),
+          ];
+          categories.forEach(
+            (category) => {
+              const button =
+                document.createElement(
+                  "button"
+                );
+              button.textContent =
+                category;
+              button.className =
+                "btn-secondary py-2 px-4 rounded-full text-sm font-medium";
+              if (category === "All")
+                button.classList.add(
+                  "active"
+                );
+              button.dataset.filter =
+                category;
+              watchlistFiltersContainer.appendChild(
+                button
+              );
+            }
+          );
+
+          watchlistFiltersContainer.addEventListener(
+            "click",
+            (e) => {
+              if (
+                e.target.tagName ===
+                "BUTTON"
+              ) {
+                const filter =
+                  e.target.dataset
+                    .filter;
+                currentFilteredData =
+                  filter === "All"
+                    ? fullWatchlistData
+                    : fullWatchlistData.filter(
+                        (item) =>
+                          item.group ===
+                          filter
+                      );
+                sortWatchlist(
+                  currentFilteredData
+                );
+                watchlistFiltersContainer
+                  .querySelectorAll(
+                    "button"
+                  )
+                  .forEach((btn) =>
+                    btn.classList.remove(
+                      "active"
+                    )
+                  );
+                e.target.classList.add(
+                  "active"
+                );
+              }
+            }
+          );
+
+          const renderModalContent = (
+            ideaId
+          ) => {
+            const idea =
+              fullWatchlistData.find(
+                (item) =>
+                  item.id === ideaId
+              );
+            if (!idea) return;
+
+            modalContent.innerHTML = `
+                <span class="inline-block bg-emerald-100 text-emerald-800 text-sm font-medium mb-4 px-3 py-1 rounded-full">${idea.group}</span>
+                <h3 class="text-2xl md:text-3xl font-bold mb-4 text-slate-800">${idea.idea}</h3>
+                <div class="space-y-5 text-slate-700 leading-relaxed">
+                    <div>
+                        <h4 class="font-semibold text-lg mb-1 text-slate-800">ปัญหาที่แก้ไข (Problem)</h4>
+                        <p>${idea.problem_desc}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg mb-1 text-slate-800">แนวทางแก้ไข (Solution)</h4>
+                        <p>${idea.solution}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg mb-1 text-slate-800">ข้อมูลเชิงลึกและตัวอย่าง</h4>
+                        <p>${idea.insight}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg mb-1 text-slate-800">โมเดลการสร้างรายได้ (Monetization)</h4>
+                        <p>${idea.monetization}</p>
+                    </div>
+                </div>
+            `;
+          };
+
+          const openModal = (
+            ideaId
+          ) => {
+            renderModalContent(ideaId);
+            modal.classList.remove(
+              "hidden"
+            );
+            modal.classList.add("flex");
+            document.body.style.overflow =
+              "hidden";
+          };
+
+          const closeModal = () => {
+            modal.classList.add(
+              "modal-leave"
+            );
+            modal
+              .querySelector(
+                "#modal-content-wrapper"
+              )
+              .classList.remove(
+                "modal-content-enter"
+              );
+            setTimeout(() => {
+              modal.classList.add(
+                "hidden"
+              );
+              modal.classList.remove(
+                "flex",
+                "modal-leave"
+              );
+              document.body.style.overflow =
+                "auto";
+            }, 300);
+          };
+
+          watchlistTableBody.addEventListener(
+            "click",
+            (e) => {
+              const row =
+                e.target.closest("tr");
+              if (
+                row &&
+                row.dataset.id
+              ) {
+                openModal(
+                  parseInt(
+                    row.dataset.id
+                  )
+                );
+              }
+            }
+          );
+
+          modalCloseBtn.addEventListener(
+            "click",
+            closeModal
+          );
+          modal.addEventListener(
+            "click",
+            (e) => {
+              if (e.target === modal) {
+                closeModal();
+              }
+            }
+          );
+
+          sortWatchlist(
+            currentFilteredData
+          );
+
+          // --- Playbook Section (Accordion) ---
+          const accordionContainer =
+            document.getElementById(
+              "accordion-container"
+            );
+          playbookData.forEach(
+            (item) => {
+              const accordionItem =
+                document.createElement(
+                  "div"
+                );
+              accordionItem.className =
+                "bg-white rounded-lg shadow-sm overflow-hidden";
+              accordionItem.innerHTML = `
+                <button class="accordion-toggle w-full flex justify-between items-center text-left p-4 font-semibold text-lg hover:bg-slate-50 transition">
+                    <span>${item.title}</span>
+                    <svg class="w-5 h-5 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                    <p class="p-4 pt-0 text-slate-600">${item.content}</p>
+                </div>
+            `;
+              accordionContainer.appendChild(
+                accordionItem
+              );
+            }
+          );
+
+          accordionContainer.addEventListener(
+            "click",
+            (e) => {
+              const toggle =
+                e.target.closest(
+                  ".accordion-toggle"
+                );
+              if (toggle) {
+                const content =
+                  toggle.nextElementSibling;
+                const icon =
+                  toggle.querySelector(
+                    "svg"
+                  );
+
+                accordionContainer
+                  .querySelectorAll(
+                    ".accordion-content"
+                  )
+                  .forEach((ac) => {
+                    if (
+                      ac !== content
+                    ) {
+                      ac.style.maxHeight =
+                        "0px";
+                      ac.previousElementSibling
+                        .querySelector(
+                          "svg"
+                        )
+                        .classList.remove(
+                          "rotate-180"
+                        );
+                    }
+                  });
+
+                if (
+                  content.style
+                    .maxHeight &&
+                  content.style
+                    .maxHeight !== "0px"
+                ) {
+                  content.style.maxHeight =
+                    "0px";
+                  icon.classList.remove(
+                    "rotate-180"
+                  );
+                } else {
+                  content.style.maxHeight =
+                    content.scrollHeight +
+                    "px";
+                  icon.classList.add(
+                    "rotate-180"
+                  );
+                }
+              }
+            }
+          );
+
+          // --- Mobile Menu ---
+          const mobileMenuButton =
+            document.getElementById(
+              "mobile-menu-button"
+            );
+          const mobileMenu =
+            document.getElementById(
+              "mobile-menu"
+            );
+          mobileMenuButton.addEventListener(
+            "click",
+            () => {
+              mobileMenu.classList.toggle(
+                "hidden"
+              );
+            }
+          );
+
+          // --- Active Nav Link on Scroll ---
+          const sections =
+            document.querySelectorAll(
+              "section"
+            );
+          const navLinks =
+            document.querySelectorAll(
+              ".nav-link"
+            );
+          const observer =
+            new IntersectionObserver(
+              (entries) => {
+                entries.forEach(
+                  (entry) => {
+                    if (
+                      entry.isIntersecting
+                    ) {
+                      navLinks.forEach(
+                        (link) => {
+                          link.classList.remove(
+                            "active"
+                          );
+                          if (
+                            link
+                              .getAttribute(
+                                "href"
+                              )
+                              .substring(
+                                1
+                              ) ===
+                            entry.target
+                              .id
+                          ) {
+                            link.classList.add(
+                              "active"
+                            );
+                          }
+                        }
+                      );
+                    }
+                  }
+                );
+              },
+              {
+                rootMargin:
+                  "-50% 0px -50% 0px",
+              }
+            );
+          sections.forEach((section) =>
+            observer.observe(section)
+          );
+        }
+      );
+    </script>
+  </body>
+</html>
